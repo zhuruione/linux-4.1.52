@@ -160,6 +160,10 @@ void ftrace_likely_update(struct ftrace_branch_data *f, int val, int expect);
 #endif /* CONFIG_PROFILE_ALL_BRANCHES */
 
 #else
+/*
+ * likely(x)和unlikely(x)是GCC内置的函数，用于告诉编译器x的取值可能性，以便编译器生成更好的代码。likely(x)表示x的取值为1的可能性较大，
+ * 而unlikely(x)表示x的取值为0的可能性较大。在Linux内核中，likely(x)和unlikely(x)宏定义可以用于修饰if/else if分支，表示该分支的条件更有可能被满足或不太可能被满足123.
+ * */
 # define likely(x)	__builtin_expect(!!(x), 1)
 # define unlikely(x)	__builtin_expect(!!(x), 0)
 #endif

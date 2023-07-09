@@ -181,7 +181,7 @@ do {									\
 
 #define percpu_from_op(op, var)				\
 ({							\
-	typeof(var) pfo_ret__;				\
+	typeof(var) pfo_ret__;		 		\
 	switch (sizeof(var)) {				\
 	case 1:						\
 		asm(op "b "__percpu_arg(1)",%0"		\

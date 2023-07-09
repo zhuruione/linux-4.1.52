@@ -43,7 +43,7 @@ enum pid_type
 
 /*
  * struct upid is used to get the id of the struct pid, as it is
- * seen in particular namespace. Later the struct pid is found with
+ * seen in particular(特定) namespace. Later the struct pid is found with
  * find_pid_ns() using the int nr and struct pid_namespace *ns.
  */
 

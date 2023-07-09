@@ -80,7 +80,7 @@ static inline void __cpu_disable_lazy_restore(unsigned int cpu)
 }
 
 /*
- * Used to indicate that the FPU state in memory is newer than the FPU
+ * Used to indicate（表明） that the FPU state in memory is newer than the FPU
  * state in registers, and the FPU state should be reloaded next time the
  * task is run. Only safe on the current task, or non-running tasks.
  */
@@ -422,9 +422,10 @@ static inline void fpu_reset_state(struct task_struct *tsk)
  * FPU state switching for scheduling.
  *
  * This is a two-stage process:
+ *    x87 是 Intel 处理器的浮点运算单元，用于执行浮点运算。SSE 是一种 SIMD 扩展，用于在 Intel 处理器上执行多媒体操作。这些指令在任务切换期间可能会导致问题，因此需要使用 CR0.TS 标志位来防止它们的执行。
  *
  *  - switch_fpu_prepare() saves the old state and
- *    sets the new state of the CR0.TS bit. This is
+ *    sets the new state of the CR0(中含有控制处理器操作模式和状态的系统控制标志).TS bit(用于在任务切换期间防止执行 x87 或 SSE（媒体）指令 ). This is
  *    done within the context of the old process.
  *
  *  - switch_fpu_finish() restores the new state as
@@ -445,7 +446,7 @@ static inline fpu_switch_t switch_fpu_prepare(struct task_struct *old, struct ta
 
 	if (__thread_has_fpu(old)) {
 		if (!__save_init_fpu(old))
-			task_disable_lazy_fpu_restore(old);
+			task_disable_lazy_fpu_restore(old);  //要求在下次运行任务时从内存中重新加载浮点运算单元的状态
 		else
 			old->thread.fpu.last_cpu = cpu;
 

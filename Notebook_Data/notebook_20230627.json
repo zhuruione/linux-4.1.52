@@ -1,0 +1,20 @@
+{
+  "{\"id\":1,\"title\":\"linux学习\",\"showOrder\":1,\"createTime\":1687856106498,\"updateTime\":1687856106498}" : {
+    "{\"id\":1,\"title\":\"汇编\",\"showOrder\":1,\"createTime\":1687856106518,\"updateTime\":1687856106518,\"notebookId\":1}" : [ {
+      "id" : 1,
+      "title" : "asm函数用法",
+      "showOrder" : 1,
+      "createTime" : 1687856106525,
+      "updateTime" : 1687856720441,
+      "chapterId" : 1,
+      "notebookId" : 1,
+      "content" : "asm()包含以下几个部分：\nasm(AssemblerTemplate:OutputOperands:InputOperands:Clobbers)\n\nAssemblerTemplate：这是一个字符串，其中包含要插入到C程序中的汇编代码。\nOutputOperands：这是一个逗号分隔的字符串列表，其中包含输出操作数的名称。\nInputOperands：这是一个逗号分隔的字符串列表，其中包含输入操作数的名称。\nClobbers：这是一个逗号分隔的字符串列表，其中包含被修改的寄存器名称。\n",
+      "description" : "",
+      "source" : "/home/zr/桌面/linuxsource/linux-4.1.52/arch/x86/include/asm/segment.h",
+      "offsetStart" : 7505,
+      "offsetEnd" : 7508,
+      "type" : "c/c++",
+      "imageRecords" : null
+    } ]
+  }
+}

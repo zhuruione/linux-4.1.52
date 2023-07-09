@@ -227,6 +227,11 @@
 #define EXCEPTION_ERRCODE_MASK		0x00027d00
 
 #define GDT_SIZE			(GDT_ENTRIES*8)
+
+/*
+ * GDT_ENTRY_TLS_ENTRIES是一个宏定义，用于在IA-32和x86-64体系结构中的全局描述符表（GDT）中设置线程本地存储（TLS）条目。该宏定义在set_thread_area()函数中使用，
+ * 该函数将TLS条目设置为GDT中的一个条目。如果该值在范围内，则set_thread_area()将u_info指向的TLS描述符写入线程的TLS数组1.
+ * */
 #define GDT_ENTRY_TLS_ENTRIES		3
 #define TLS_SIZE			(GDT_ENTRY_TLS_ENTRIES* 8)
 

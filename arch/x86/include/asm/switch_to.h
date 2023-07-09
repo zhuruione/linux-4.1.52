@@ -79,7 +79,7 @@ do {									\
 #else /* CONFIG_X86_32 */
 
 /* frame pointer must be last for get_wchan */
-#define SAVE_CONTEXT    "pushq %%rbp ; movq %%rsi,%%rbp\n\t"
+#define SAVE_CONTEXT    "pushq %%rbp ; movq %%rsi,%%rbp\n\t"  //首先将基指针寄存器（rbp）的值推送到堆栈上，然后将源索引寄存器（rsi）的值移动到基指针寄存器（rbp）中。这为函数设置了一个新的堆栈帧，并在堆栈上保存了先前的基指针值。
 #define RESTORE_CONTEXT "movq %%rbp,%%rsi ; popq %%rbp\t"
 
 #define __EXTRA_CLOBBER  \
@@ -106,10 +106,10 @@ do {									\
  * has no effect.
  */
 #define switch_to(prev, next, last) \
-	asm volatile(SAVE_CONTEXT					  \
-	     "movq %%rsp,%P[threadrsp](%[prev])\n\t" /* save RSP */	  \
+	asm volatile(SAVE_CONTEXT	 /*切换当前的任务队栈*/				  \
+	     "movq %%rsp,%P[threadrsp](%[prev])\n\t" /* save RSP  */	  \
 	     "movq %P[threadrsp](%[next]),%%rsp\n\t" /* restore RSP */	  \
-	     "call __switch_to\n\t"					  \
+	     "call __switch_to\n\t"			/*调用__switch_to 函数*/		  \
 	     "movq "__percpu_arg([current_task])",%%rsi\n\t"		  \
 	     __switch_canary						  \
 	     "movq %P[thread_info](%%rsi),%%r8\n\t"			  \

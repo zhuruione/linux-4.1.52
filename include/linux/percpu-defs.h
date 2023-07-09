@@ -300,6 +300,8 @@ extern void __this_cpu_preempt_check(const char *op);
 static inline void __this_cpu_preempt_check(const char *op) { }
 #endif
 
+
+//It is used to call a function that returns a value of size 1, 2, 4 or 8 bytes on the current CPU. The macro is defined in the file percpu-defs.h12.
 #define __pcpu_size_call_return(stem, variable)				\
 ({									\
 	typeof(variable) pscr_ret__;					\

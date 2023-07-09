@@ -244,7 +244,7 @@ static inline unsigned long native_store_tr(void)
 
 static inline void native_load_tls(struct thread_struct *t, unsigned int cpu)
 {
-	struct desc_struct *gdt = get_cpu_gdt_table(cpu);
+	struct desc_struct *gdt = get_cpu_gdt_table(cpu); //获取当前cpu的全局描述符
 	unsigned int i;
 
 	for (i = 0; i < GDT_ENTRY_TLS_ENTRIES; i++)
