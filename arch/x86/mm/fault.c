@@ -1094,7 +1094,7 @@ __do_page_fault(struct pt_regs *regs, unsigned long error_code,
 	 * (error_code & 4) == 0, and that the fault was not a
 	 * protection error (error_code & 9) == 0.
 	 */
-	if (unlikely(fault_in_kernel_space(address))) {
+	if (unlikely(fault_in_kernel_space(address))) {  //判断引起缺页的线性地址是否属于内核空间
 		if (!(error_code & (PF_RSVD | PF_USER | PF_PROT))) {
 			if (vmalloc_fault(address) >= 0)
 				return;
@@ -1135,7 +1135,7 @@ __do_page_fault(struct pt_regs *regs, unsigned long error_code,
 	 * If we're in an interrupt, have no user context or are running
 	 * in an atomic region then we must not take the fault:
 	 */
-	if (unlikely(in_atomic() || !mm)) {
+	if (unlikely(in_atomic() || !mm)) { //判断异常发生时，内核是否正在运行内核线程
 		bad_area_nosemaphore(regs, error_code, address);
 		return;
 	}
@@ -1194,7 +1194,7 @@ retry:
 		might_sleep();
 	}
 
-	vma = find_vma(mm, address);
+	vma = find_vma(mm, address); //获取发生异常的地址的线性区
 	if (unlikely(!vma)) {
 		bad_area(regs, error_code, address);
 		return;
@@ -1227,7 +1227,7 @@ retry:
 	 * we can handle it..
 	 */
 good_area:
-	if (unlikely(access_error(error_code, vma))) {
+	if (unlikely(access_error(error_code, vma))) { //判断访问类型是否匹配
 		bad_area_access_error(regs, error_code, address);
 		return;
 	}

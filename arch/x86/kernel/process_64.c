@@ -153,7 +153,7 @@ static inline u32 read_32bit_tls(struct task_struct *t, int tls)
 }
 
 int copy_thread(unsigned long clone_flags, unsigned long sp,
-		unsigned long arg, struct task_struct *p)
+		unsigned long arg, struct task_struct *p)      //arg变量只有在创建内核进程时才能用到
 {
 	int err;
 	struct pt_regs *childregs;
@@ -183,7 +183,7 @@ int copy_thread(unsigned long clone_flags, unsigned long sp,
 		childregs->orig_ax = -1;
 		childregs->cs = __KERNEL_CS | get_kernel_rpl();
 		childregs->flags = X86_EFLAGS_IF | X86_EFLAGS_FIXED;
-		return 0;
+		return 0;  //内核进程结束
 	}
 	*childregs = *current_pt_regs();
 

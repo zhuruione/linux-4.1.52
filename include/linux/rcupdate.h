@@ -368,6 +368,11 @@ extern struct srcu_struct tasks_rcu_exit_srcu;
 			ACCESS_ONCE((t)->rcu_tasks_holdout) = false; \
 	} while (0)
 #else /* #ifdef CONFIG_TASKS_RCU */
+/*
+ * TASKS_RCU(int tasks_rcu_i) 是一个用于 Linux 内核的函数。RCU 代表“Read-Copy-Update”，
+ * 这是一种针对读多写少情况进行优化的同步机制。它用于同步内核中的共享数据结构。该函数接受一个整数参数
+ * tasks_rcu_i，该参数用于指定当前在系统上运行的任务数。
+ * */
 #define TASKS_RCU(x) do { } while (0)
 #define rcu_note_voluntary_context_switch(t)	rcu_all_qs()
 #endif /* #else #ifdef CONFIG_TASKS_RCU */

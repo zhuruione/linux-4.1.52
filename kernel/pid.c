@@ -41,7 +41,7 @@
 
 #define pid_hashfn(nr, ns)	\
 	hash_long((unsigned long)nr + (unsigned long)ns, pidhash_shift)
-static struct hlist_head *pid_hash;
+static struct hlist_head *pid_hash; //所有pid hash表的表头
 static unsigned int pidhash_shift = 4;
 struct pid init_struct_pid = INIT_STRUCT_PID;
 
@@ -294,7 +294,7 @@ void free_pid(struct pid *pid)
 	call_rcu(&pid->rcu, delayed_put_pid);
 }
 
-struct pid *alloc_pid(struct pid_namespace *ns)
+struct pid *alloc_pid(struct pid_namespace *ns) //对新进程的pid分配内存空间并进行一些初始化
 {
 	struct pid *pid;
 	enum pid_type type;
@@ -303,22 +303,22 @@ struct pid *alloc_pid(struct pid_namespace *ns)
 	struct upid *upid;
 	int retval = -ENOMEM;
 
-	pid = kmem_cache_alloc(ns->pid_cachep, GFP_KERNEL);
+	pid = kmem_cache_alloc(ns->pid_cachep, GFP_KERNEL);  //在ns的pid_cachep中为pid分配空间
 	if (!pid)
 		return ERR_PTR(retval);
 
 	tmp = ns;
-	pid->level = ns->level;
+	pid->level = ns->level; //将父进程的namespace的level赋值给新进程的pid结构体的level
 	for (i = ns->level; i >= 0; i--) {
-		nr = alloc_pidmap(tmp);
+		nr = alloc_pidmap(tmp); //通过pid位图来为新进程分配一个pid
 		if (IS_ERR_VALUE(nr)) {
 			retval = nr;
 			goto out_free;
 		}
 
-		pid->numbers[i].nr = nr;
-		pid->numbers[i].ns = tmp;
-		tmp = tmp->parent;
+		pid->numbers[i].nr = nr; //在pid结构体中记录每层pid_ns分配的pid值
+		pid->numbers[i].ns = tmp;  //记录每层pid_ns分配同时，记录pid值对应进程的pid_ns地址
+		tmp = tmp->parent; //将tmp设置为上一级namespace
 	}
 
 	if (unlikely(is_child_reaper(pid))) {
@@ -333,14 +333,14 @@ struct pid *alloc_pid(struct pid_namespace *ns)
 	for (type = 0; type < PIDTYPE_MAX; ++type)
 		INIT_HLIST_HEAD(&pid->tasks[type]);
 
-	upid = pid->numbers + ns->level;
+	upid = pid->numbers + ns->level;  //设置了upid的内存地址，动态分配了pid.numbers数组的长度
 	spin_lock_irq(&pidmap_lock);
 	if (!(ns->nr_hashed & PIDNS_HASH_ADDING))
 		goto out_unlock;
 	for ( ; upid >= pid->numbers; --upid) {
 		hlist_add_head_rcu(&upid->pid_chain,
-				&pid_hash[pid_hashfn(upid->nr, upid->ns)]);
-		upid->ns->nr_hashed++;
+				&pid_hash[pid_hashfn(upid->nr, upid->ns)]); //upid->pid_chain 所在的地址插入到pid_hash[pid_hashfn(upid->nr, upid->ns)]所在的链表中
+		upid->ns->nr_hashed++; ////更新这层pid_ns的pid已使用值，即直接加一即可
 	}
 	spin_unlock_irq(&pidmap_lock);
 
@@ -545,7 +545,7 @@ pid_t task_tgid_nr_ns(struct task_struct *tsk, struct pid_namespace *ns)
 }
 EXPORT_SYMBOL(task_tgid_nr_ns);
 
-struct pid_namespace *task_active_pid_ns(struct task_struct *tsk)
+struct pid_namespace *task_active_pid_ns(struct task_struct *tsk)  //获取tsk任务pid所属的pid命名空间
 {
 	return ns_of_pid(task_pid(tsk));
 }

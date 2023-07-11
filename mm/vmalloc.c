@@ -124,7 +124,7 @@ static int vmap_pte_range(pmd_t *pmd, unsigned long addr,
 	 * callers keep track of where we're up to.
 	 */
 
-	pte = pte_alloc_kernel(pmd, addr);
+	pte = pte_alloc_kernel(pmd, addr); //分配页表项
 	if (!pte)
 		return -ENOMEM;
 	do {
@@ -146,7 +146,7 @@ static int vmap_pmd_range(pud_t *pud, unsigned long addr,
 	pmd_t *pmd;
 	unsigned long next;
 
-	pmd = pmd_alloc(&init_mm, pud, addr);
+	pmd = pmd_alloc(&init_mm, pud, addr); //为新的内存分区创建页中间目录
 	if (!pmd)
 		return -ENOMEM;
 	do {
@@ -163,7 +163,7 @@ static int vmap_pud_range(pgd_t *pgd, unsigned long addr,
 	pud_t *pud;
 	unsigned long next;
 
-	pud = pud_alloc(&init_mm, pgd, addr);
+	pud = pud_alloc(&init_mm, pgd, addr);//为新的内存区创建一个页上级目录
 	if (!pud)
 		return -ENOMEM;
 	do {
@@ -179,6 +179,7 @@ static int vmap_pud_range(pgd_t *pgd, unsigned long addr,
  * will have pfns corresponding to the "pages" array.
  *
  * Ie. pte at addr+N*PAGE_SIZE shall point to pfn corresponding to pages[N]
+ * 用于将一段物理页面映射到虚拟地址空间的函数
  */
 static int vmap_page_range_noflush(unsigned long start, unsigned long end,
 				   pgprot_t prot, struct page **pages)
@@ -190,9 +191,9 @@ static int vmap_page_range_noflush(unsigned long start, unsigned long end,
 	int nr = 0;
 
 	BUG_ON(addr >= end);
-	pgd = pgd_offset_k(addr);
+	pgd = pgd_offset_k(addr);  //获取主内核页全局目录中的目录项的数组下标
 	do {
-		next = pgd_addr_end(addr, end);
+		next = pgd_addr_end(addr, end);//获取addr虚拟地址所在页全局目录项地址的边界
 		err = vmap_pud_range(pgd, addr, next, prot, pages, &nr);
 		if (err)
 			return err;
@@ -1291,8 +1292,8 @@ EXPORT_SYMBOL_GPL(unmap_kernel_range);
 
 int map_vm_area(struct vm_struct *area, pgprot_t prot, struct page **pages)
 {
-	unsigned long addr = (unsigned long)area->addr;
-	unsigned long end = addr + get_vm_area_size(area);
+	unsigned long addr = (unsigned long)area->addr; //线性地址首地址
+	unsigned long end = addr + get_vm_area_size(area);//尾地址
 	int err;
 
 	err = vmap_page_range(addr, end, prot, pages);
@@ -1658,12 +1659,12 @@ void *__vmalloc_node_range(unsigned long size, unsigned long align,
 	void *addr;
 	unsigned long real_size = size;
 
-	size = PAGE_ALIGN(size);
-	if (!size || (size >> PAGE_SHIFT) > totalram_pages)
+	size = PAGE_ALIGN(size); //将size与页框大小对齐
+	if (!size || (size >> PAGE_SHIFT) > totalram_pages) //若size为0或size大小大于总内存大小，则失败
 		goto fail;
 
 	area = __get_vm_area_node(size, align, VM_ALLOC | VM_UNINITIALIZED |
-				vm_flags, start, end, node, gfp_mask, caller);
+				vm_flags, start, end, node, gfp_mask, caller);  //获取一个新的vm_struct描述符
 	if (!area)
 		goto fail;
 

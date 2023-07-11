@@ -581,9 +581,9 @@ struct rq {
 	unsigned long nr_load_updates;
 	u64 nr_switches;
 
-	struct cfs_rq cfs;
-	struct rt_rq rt;
-	struct dl_rq dl;
+	struct cfs_rq cfs; //表示完全公平调度器（Completely Fair Scheduler）运行队列的调度实体。
+	struct rt_rq rt; //：表示实时调度器（Real-Time Scheduler）运行队列的调度实体。
+	struct dl_rq dl; //表示截止期限调度器（Deadline Scheduler）运行队列的调度实体。
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	/* list of leaf cfs_rq on this cpu: */
@@ -631,7 +631,7 @@ struct rq {
 
 	u64 rt_avg;
 	u64 age_stamp;
-	u64 idle_stamp;
+	u64 idle_stamp; //记录了 CPU 上次变为空闲状态的时间戳
 	u64 avg_idle;
 
 	/* This is used to determine avg_idle's max value */

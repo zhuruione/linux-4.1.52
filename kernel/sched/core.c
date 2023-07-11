@@ -1666,7 +1666,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 */
 	smp_mb__before_spinlock();
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
-	if (!(p->state & state))
+	if (!(p->state & state)) //检查p->state是否属于state状态掩码，若不属于，则直接跳过
 		goto out;
 
 	success = 1; /* we're going to change ->state */

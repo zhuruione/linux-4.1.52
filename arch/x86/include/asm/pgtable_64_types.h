@@ -24,8 +24,8 @@ typedef struct { pteval_t pte; } pte_t;
 /*
  * PGDIR_SHIFT determines what a top-level page table entry can map
  */
-#define PGDIR_SHIFT	39
-#define PTRS_PER_PGD	512
+#define PGDIR_SHIFT	39 //表示页全局目录项在虚拟地址中所占的位数。在 x86 架构上
+#define PTRS_PER_PGD	512 //页全局变量数组的个数，也就是下级页表目录的位数
 
 /*
  * 3rd level page
@@ -50,7 +50,7 @@ typedef struct { pteval_t pte; } pte_t;
 #define PUD_SIZE	(_AC(1, UL) << PUD_SHIFT)
 #define PUD_MASK	(~(PUD_SIZE - 1))
 #define PGDIR_SIZE	(_AC(1, UL) << PGDIR_SHIFT)
-#define PGDIR_MASK	(~(PGDIR_SIZE - 1))
+#define PGDIR_MASK	(~(PGDIR_SIZE - 1)) //它通过对 PGDIR_SIZE 减去 1，并取反得到页全局目录项的掩码。掩码的作用是将虚拟地址按照页全局目录项的大小进行对齐
 
 /* See Documentation/x86/x86_64/mm.txt for a description of the memory map. */
 #define MAXMEM		 _AC(__AC(1, UL) << MAX_PHYSMEM_BITS, UL)

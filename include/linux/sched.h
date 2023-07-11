@@ -202,7 +202,7 @@ print_cfs_rq(struct seq_file *m, int cpu, struct cfs_rq *cfs_rq);
  */
 #define TASK_RUNNING		0
 #define TASK_INTERRUPTIBLE	1
-#define TASK_UNINTERRUPTIBLE	2
+#define TASK_UNINTERRUPTIBLE	2 //意味着进程在某种等待状态下，不能被普通的信号中断，即使收到了信号，也不会立即唤醒
 #define __TASK_STOPPED		4
 #define __TASK_TRACED		8
 /* in tsk->exit_state */
@@ -211,7 +211,7 @@ print_cfs_rq(struct seq_file *m, int cpu, struct cfs_rq *cfs_rq);
 #define EXIT_TRACE		(EXIT_ZOMBIE | EXIT_DEAD)
 /* in tsk->state again */
 #define TASK_DEAD		64
-#define TASK_WAKEKILL		128
+#define TASK_WAKEKILL		128 //意味着进程处于一个特殊的终止状态，即使它当前处于睡眠或被挂起的状态，也会被强制唤醒，并执行终止操作。
 #define TASK_WAKING		256
 #define TASK_PARKED		512
 #define TASK_STATE_MAX		1024
@@ -621,7 +621,7 @@ struct signal_struct {
 	struct task_struct	*curr_target;
 
 	/* shared signal handling: */
-	struct sigpending	shared_pending;
+	struct sigpending	shared_pending; //线程组共享的挂起信号
 
 	/* thread group exit support */
 	int			group_exit_code;
@@ -1319,6 +1319,10 @@ struct task_struct {
 
 	int wake_cpu;
 #endif
+    /*
+     * 字段用于标记进程当前是否在运行队列上。如果该字段为真（非零），
+     * 表示进程在运行队列上。如果该字段为假（零），表示进程不在运行队列上，可能是在等待队列或其他状态。
+     * */
 	int on_rq;
 
 	int prio, static_prio, normal_prio;
@@ -1506,13 +1510,13 @@ struct task_struct {
 	struct signal_struct *signal;
 	struct sighand_struct *sighand;
 
-	sigset_t blocked, real_blocked;
+	sigset_t blocked, real_blocked;  //blocked: 被阻塞的信号掩码 ，
 	sigset_t saved_sigmask;	/* restored if set_restore_sigmask() was used */
-	struct sigpending pending;
+	struct sigpending pending;  //存放私有挂起信号
 
 	unsigned long sas_ss_sp;
 	size_t sas_ss_size;
-	int (*notifier)(void *priv);
+	int (*notifier)(void *priv);  //指向一个函数的指针，设备驱动程序使用这个函数阻塞进程的某些信号
 	void *notifier_data;
 	sigset_t *notifier_mask;
 	struct callback_head *task_works;
@@ -1788,7 +1792,7 @@ static inline bool should_numa_migrate_memory(struct task_struct *p,
 }
 #endif
 
-static inline struct pid *task_pid(struct task_struct *task)
+static inline struct pid *task_pid(struct task_struct *task) //获取 pids 中PIDTYPE_PID（进程的pid）类型的hash表地址
 {
 	return task->pids[PIDTYPE_PID].pid;
 }
@@ -2814,9 +2818,9 @@ static inline int fatal_signal_pending(struct task_struct *p)
 
 static inline int signal_pending_state(long state, struct task_struct *p)
 {
-	if (!(state & (TASK_INTERRUPTIBLE | TASK_WAKEKILL)))
+	if (!(state & (TASK_INTERRUPTIBLE | TASK_WAKEKILL))) //如果没有设置为可中断和任务处于杀死状态，则返回
 		return 0;
-	if (!signal_pending(p))
+	if (!signal_pending(p)) //如果没有信号被挂起，则返回
 		return 0;
 
 	return (state & TASK_INTERRUPTIBLE) || __fatal_signal_pending(p);

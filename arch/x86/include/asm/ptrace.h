@@ -29,7 +29,7 @@ struct pt_regs {
 };
 
 #else /* __i386__ */
-
+//在Linux内核中，pt_regs结构体是用于保存进程上下文的结构体
 struct pt_regs {
 /*
  * C ABI says these regs are callee-preserved. They aren't saved on kernel entry
@@ -39,7 +39,7 @@ struct pt_regs {
 	unsigned long r14;
 	unsigned long r13;
 	unsigned long r12;
-	unsigned long bp;
+	unsigned long bp;//其中，bp变量是指向栈底的指针，它的作用是用于函数调用时保存上一个函数的栈底指针。
 	unsigned long bx;
 /* These regs are callee-clobbered. Always saved on kernel entry. */
 	unsigned long r11;
@@ -58,7 +58,7 @@ struct pt_regs {
 	unsigned long orig_ax;
 /* Return frame for iretq */
 	unsigned long ip;
-	unsigned long cs;
+	unsigned long cs;  //代码段寄存器
 	unsigned long flags;
 	unsigned long sp;
 	unsigned long ss;

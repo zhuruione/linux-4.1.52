@@ -157,10 +157,10 @@ static inline int invalid_vm86_irq(int irq)
 
 #define NR_IRQS_LEGACY			  16
 
-#define IO_APIC_VECTOR_LIMIT		( 32 * MAX_IO_APICS )
+#define IO_APIC_VECTOR_LIMIT		( 32 * MAX_IO_APICS ) //32*128=14800
 
 #ifdef CONFIG_X86_IO_APIC
-# define CPU_VECTOR_LIMIT		(64 * NR_CPUS)
+# define CPU_VECTOR_LIMIT		(64 * NR_CPUS)  //64*64=4096
 # define NR_IRQS					\
 	(CPU_VECTOR_LIMIT > IO_APIC_VECTOR_LIMIT ?	\
 		(NR_VECTORS + CPU_VECTOR_LIMIT)  :	\

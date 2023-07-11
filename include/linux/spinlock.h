@@ -212,7 +212,7 @@ static inline void do_raw_spin_unlock(raw_spinlock_t *lock) __releases(lock)
 
 #if defined(CONFIG_SMP) || defined(CONFIG_DEBUG_SPINLOCK)
 
-#define raw_spin_lock_irqsave(lock, flags)			\
+#define raw_spin_lock_irqsave(lock, flags)		/*同时获取自旋锁（spin lock）并禁用硬件中断*/	\
 	do {						\
 		typecheck(unsigned long, flags);	\
 		flags = _raw_spin_lock_irqsave(lock);	\

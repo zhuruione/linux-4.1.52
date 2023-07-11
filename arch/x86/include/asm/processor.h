@@ -475,7 +475,7 @@ DECLARE_PER_CPU_ALIGNED(struct stack_canary, stack_canary);
  * per-CPU IRQ handling stacks
  */
 struct irq_stack {
-	u32                     stack[THREAD_SIZE/sizeof(u32)];
+	u32                     stack[THREAD_SIZE/sizeof(u32)]; // 16k/4=4k
 } __aligned(THREAD_SIZE);
 
 DECLARE_PER_CPU(struct irq_stack *, hardirq_stack);
@@ -878,7 +878,7 @@ extern unsigned long thread_saved_pc(struct task_struct *tsk);
  * particular problem by preventing anything from being mapped
  * at the maximum canonical address.
  */
-#define TASK_SIZE_MAX	((1UL << 47) - PAGE_SIZE)
+#define TASK_SIZE_MAX	((1UL << 47) - PAGE_SIZE) //留出一个页面大小的空间，用于内核数据结构或保护页等用途
 
 /* This decides where the kernel will search for a free chunk of vm
  * space during mmap's.

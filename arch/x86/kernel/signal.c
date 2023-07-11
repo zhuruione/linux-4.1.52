@@ -407,7 +407,7 @@ static int __setup_rt_frame(int sig, struct ksignal *ksig,
 	void __user *fp = NULL;
 	int err = 0;
 
-	frame = get_sigframe(&ksig->ka, regs, sizeof(struct rt_sigframe), &fp);
+	frame = get_sigframe(&ksig->ka, regs, sizeof(struct rt_sigframe), &fp); //计算帧的第一个内存单元
 
 	if (!access_ok(VERIFY_WRITE, frame, sizeof(*frame)))
 		return -EFAULT;

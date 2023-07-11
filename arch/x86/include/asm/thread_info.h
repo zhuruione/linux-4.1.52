@@ -56,7 +56,7 @@ struct thread_info {
 	__u32			flags;		/* low level flags */
 	__u32			status;		/* thread synchronous flags */
 	__u32			cpu;		/* current CPU */
-	int			saved_preempt_count;
+	int			saved_preempt_count; //用于保存与抢占（preemption）相关的计数器。
 	mm_segment_t		addr_limit;
 	void __user		*sysenter_return;
 	unsigned int		sig_on_uaccess_error:1;

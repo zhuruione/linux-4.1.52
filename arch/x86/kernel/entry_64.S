@@ -1120,15 +1120,15 @@ bad_gs:
 
 /* Call softirq on interrupt stack. Interrupts are off. */
 ENTRY(do_softirq_own_stack)
-	CFI_STARTPROC
-	pushq_cfi %rbp
-	CFI_REL_OFFSET rbp,0
-	mov  %rsp,%rbp
-	CFI_DEF_CFA_REGISTER rbp
-	incl PER_CPU_VAR(irq_count)
+	CFI_STARTPROC  //标记函数的起始。
+	pushq_cfi %rbp //将rbp（栈帧）值压入栈中
+	CFI_REL_OFFSET rbp,0 //设置 %rbp 寄存器的偏移量为0，以便在栈展开时恢复正确的帧指针值。
+	mov  %rsp,%rbp   //rsp：栈顶指针，rbp：栈帧指针  将当前栈顶指针的值赋值给rbp创建新的栈帧
+	CFI_DEF_CFA_REGISTER rbp //定义新的栈帧指针寄存器为 %rbp，用于调试和堆栈跟踪。
+	incl PER_CPU_VAR(irq_count) //将指定的变量 PER_CPU_VAR(irq_count) 的值加1。这可能是用于统计当前 CPU 上的软中断计数。
 	cmove PER_CPU_VAR(irq_stack_ptr),%rsp
-	push  %rbp			# backlink for old unwinder
-	call __do_softirq
+	push  %rbp			# backlink for old unwinder //将 %rbp 的值压入栈中，作为旧的堆栈帧的回溯链接。
+	call __do_softirq  /
 	leaveq
 	CFI_RESTORE		rbp
 	CFI_DEF_CFA_REGISTER	rsp

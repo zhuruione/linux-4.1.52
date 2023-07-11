@@ -154,7 +154,7 @@ typedef u64 dma_addr_t;
 typedef u32 dma_addr_t;
 #endif
 
-typedef unsigned __bitwise__ gfp_t;
+typedef unsigned __bitwise__ gfp_t;  //Get Free Pages 用于表示在内核中进行内存分配时的一些特定选项和约束。
 typedef unsigned __bitwise__ fmode_t;
 typedef unsigned __bitwise__ oom_flags_t;
 

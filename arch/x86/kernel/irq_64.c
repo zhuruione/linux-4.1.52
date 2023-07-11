@@ -34,6 +34,7 @@ int sysctl_panic_on_stackoverflow;
  * Only check the stack in process context, because everything else
  * runs on the big interrupt stacks. Checking reliably is too expensive,
  * so we just check from interrupts.
+ * 用于检查当前线程的堆栈（stack）是否发生了溢出。
  */
 static inline void stack_overflow_check(struct pt_regs *regs)
 {
@@ -80,7 +81,7 @@ bool handle_irq(unsigned irq, struct pt_regs *regs)
 
 	stack_overflow_check(regs);
 
-	desc = irq_to_desc(irq);
+	desc = irq_to_desc(irq); //获取中断号对应的中断描述符
 	if (unlikely(!desc))
 		return false;
 

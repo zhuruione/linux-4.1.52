@@ -394,7 +394,7 @@ setup_affinity(unsigned int irq, struct irq_desc *desc, struct cpumask *mask)
 
 void __disable_irq(struct irq_desc *desc, unsigned int irq)
 {
-	if (!desc->depth++)
+	if (!desc->depth++)  //如果depth等于0 函数禁用irq线并设置IRQD_IRQ_DISABLED标志
 		irq_disable(desc);
 }
 
@@ -475,17 +475,17 @@ EXPORT_SYMBOL_GPL(disable_hardirq);
 void __enable_irq(struct irq_desc *desc, unsigned int irq)
 {
 	switch (desc->depth) {
-	case 0:
+	case 0:  //说明该中断没有正确地被禁用，按理说进入到这一步时，depth会大于0,如果还是等于0的话，就被认为是不平衡的中断启用，可能是由于错误的中断处理顺序或状态管理问题导致的。
  err_out:
-		WARN(1, KERN_WARNING "Unbalanced enable for IRQ %d\n", irq);
+		WARN(1, KERN_WARNING "Unbalanced enable for IRQ %d\n", irq); // 当深度为0时，说明该中断没有正确地被禁用，打印警告信息
 		break;
-	case 1: {
+	case 1: {   //在处理最外层的中断
 		if (desc->istate & IRQS_SUSPENDED)
 			goto err_out;
 		/* Prevent probing on this irq: */
-		irq_settings_set_noprobe(desc);
+		irq_settings_set_noprobe(desc); //用于在中断处理程序中标记某个中断向量（IRQ）不应被调试器（如GDB）跟踪和断点调试。
 		irq_enable(desc);
-		check_irq_resend(desc, irq);
+		check_irq_resend(desc, irq); //挽救丢失的中断
 		/* fall-through */
 	}
 	default:

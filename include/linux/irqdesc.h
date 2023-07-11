@@ -47,47 +47,50 @@ struct pt_regs;
  * @name:		flow handler name for /proc/interrupts output
  */
 struct irq_desc {
-	struct irq_common_data	irq_common_data;
-	struct irq_data		irq_data;
-	unsigned int __percpu	*kstat_irqs;
-	irq_flow_handler_t	handle_irq;
+	struct irq_common_data	irq_common_data; //包含与中断处理相关的通用数据。
+	struct irq_data		irq_data;            //包含与中断处理相关的数据，如中断号、中断操作函数等。
+	unsigned int __percpu	*kstat_irqs;     //用于统计中断的计数器，每个 CPU 都有一个。
+	irq_flow_handler_t	handle_irq;          //中断处理函数，是中断处理的基本流程函数类型，负责中断的分发和处理流程。
 #ifdef CONFIG_IRQ_PREFLOW_FASTEOI
-	irq_preflow_handler_t	preflow_handler;
+	irq_preflow_handler_t	preflow_handler;   //用于提前处理中断的处理函数，仅在启用了 CONFIG_IRQ_PREFLOW_FASTEOI 选项时可用。
 #endif
-	struct irqaction	*action;	/* IRQ action list */
-	unsigned int		status_use_accessors;
-	unsigned int		core_internal_state__do_not_mess_with_it;
-	unsigned int		depth;		/* nested irq disables */
-	unsigned int		wake_depth;	/* nested wake enables */
-	unsigned int		irq_count;	/* For detecting broken IRQs */
-	unsigned long		last_unhandled;	/* Aging timer for unhandled count */
-	unsigned int		irqs_unhandled;
-	atomic_t		threads_handled;
-	int			threads_handled_last;
-	raw_spinlock_t		lock;
-	struct cpumask		*percpu_enabled;
+	struct irqaction	*action;   /*
+                                    * IRQ action list  指向中断处理程序的链表，保存与该中断相关的所有中断动作。
+                                    * 是具体中断处理逻辑的实现函数类型，用于执行中断事件发生时的具体操作。两者在中断处理过程中有不同的角色和功能，但它们通常一起协同工作来完成对中断的处理
+                                    * */
+	unsigned int		status_use_accessors; //表示是否使用访问器函数来读取和写入中断状态。
+	unsigned int		core_internal_state__do_not_mess_with_it;  //内核内部状态变量，用于中断处理的内核使用   istate为他的宏定义。
+	unsigned int		depth;		/* nested irq disables   表示当前中断嵌套的深度，用于中断的禁用和启用。*/
+	unsigned int		wake_depth;	/* nested wake enables   表示嵌套唤醒中断的深度，用于唤醒中断的禁用和启用。*/
+	unsigned int		irq_count;	/* For detecting broken IRQs  用于检测是否存在中断问题的计数器。*/
+	unsigned long		last_unhandled;	/* Aging timer for unhandled count  未处理中断的计时器，用于检测未处理中断的时长。*/
+	unsigned int		irqs_unhandled;       //未处理中断的计数。
+	atomic_t		threads_handled;          //已处理中断的线程计数。
+	int			threads_handled_last;         //上一次已处理中断的线程计数。
+	raw_spinlock_t		lock;                 //结构体的访问的自旋锁。
+	struct cpumask		*percpu_enabled;      //指向处理中断的 CPU 集合。
 #ifdef CONFIG_SMP
-	const struct cpumask	*affinity_hint;
-	struct irq_affinity_notify *affinity_notify;
+	const struct cpumask	*affinity_hint;   //用于指示中断亲和性的提示。
+	struct irq_affinity_notify *affinity_notify; //指向中断亲和性通知的结构体。
 #ifdef CONFIG_GENERIC_PENDING_IRQ
-	cpumask_var_t		pending_mask;
+	cpumask_var_t		pending_mask;         //用于存储待处理中断的 CPU 集合。
 #endif
 #endif
-	unsigned long		threads_oneshot;
-	atomic_t		threads_active;
-	wait_queue_head_t       wait_for_threads;
+	unsigned long		threads_oneshot;      //用于跟踪一次性中断处理线程的数量。
+	atomic_t		threads_active;           //活动中断处理线程的计数。
+	wait_queue_head_t       wait_for_threads; //等待中断处理线程完成的等待队列头。
 #ifdef CONFIG_PM_SLEEP
-	unsigned int		nr_actions;
-	unsigned int		no_suspend_depth;
-	unsigned int		cond_suspend_depth;
-	unsigned int		force_resume_depth;
+	unsigned int		nr_actions;           //中断动作的数量。
+	unsigned int		no_suspend_depth;     //禁用挂起的深度。
+	unsigned int		cond_suspend_depth;   //条件挂起的深度。
+	unsigned int		force_resume_depth;   //强制恢复的深度。
 #endif
 #ifdef CONFIG_PROC_FS
-	struct proc_dir_entry	*dir;
+	struct proc_dir_entry	*dir;             //指向中断在 /proc 文件系统中的目录项的指针。
 #endif
-	int			parent_irq;
-	struct module		*owner;
-	const char		*name;
+	int			parent_irq;                   //父中断号。
+	struct module		*owner;               //拥有该中断的内核模块。
+	const char		*name;                    //中断的名称。
 } ____cacheline_internodealigned_in_smp;
 
 #ifndef CONFIG_SPARSE_IRQ

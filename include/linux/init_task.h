@@ -186,6 +186,7 @@ extern struct task_group root_task_group;
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x1fffff (=2MB)
  */
+
 #define INIT_TASK(tsk)	\
 {									\
 	.state		= 0,						\

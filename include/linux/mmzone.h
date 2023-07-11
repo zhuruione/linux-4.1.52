@@ -91,7 +91,7 @@ static inline int get_pfnblock_migratetype(struct page *page, unsigned long pfn)
 
 struct free_area {
 	struct list_head	free_list[MIGRATE_TYPES];
-	unsigned long		nr_free;
+	unsigned long		nr_free; //指定了大小为2^k的空闲页框块
 };
 
 struct pglist_data;
@@ -475,7 +475,7 @@ struct zone {
 
 	ZONE_PADDING(_pad1_)
 	/* free areas of different sizes */
-	struct free_area	free_area[MAX_ORDER];
+	struct free_area	free_area[MAX_ORDER]; //第k个元素表示所有大小为2^k的空闲块
 
 	/* zone flags, see below */
 	unsigned long		flags;

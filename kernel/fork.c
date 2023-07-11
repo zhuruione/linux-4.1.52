@@ -1462,7 +1462,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	if (retval)
 		goto bad_fork_cleanup_io;
 
-	if (pid != &init_struct_pid) {
+	if (pid != &init_struct_pid) { //判断是否是init进程，若不是则对pid进行初始化
 		pid = alloc_pid(p->nsproxy->pid_ns_for_children);
 		if (IS_ERR(pid)) {
 			retval = PTR_ERR(pid);
@@ -1504,7 +1504,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	clear_all_latency_tracing(p);
 
 	/* ok, now we should be set up.. */
-	p->pid = pid_nr(pid);
+	p->pid = pid_nr(pid); //将task_struct中的pid设置为全局pid,即第0层namespace的pid
 	if (clone_flags & CLONE_THREAD) {
 		p->exit_signal = -1;
 		p->group_leader = current->group_leader;
@@ -1571,7 +1571,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	if (likely(p->pid)) {
 		ptrace_init_task(p, (clone_flags & CLONE_PTRACE) || trace);
 
-		init_task_pid(p, PIDTYPE_PID, pid);
+		init_task_pid(p, PIDTYPE_PID, pid);  //将struct pid 结构地址保存到进程描述符中
 		if (thread_group_leader(p)) {     //如果当前进程为进程组的首进程时，设置当前进程的会话id和组id设置为当前进程
 			init_task_pid(p, PIDTYPE_PGID, task_pgrp(current));
 			init_task_pid(p, PIDTYPE_SID, task_session(current));

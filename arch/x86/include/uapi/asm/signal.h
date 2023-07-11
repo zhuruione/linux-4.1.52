@@ -62,7 +62,7 @@ typedef unsigned long sigset_t;
 #define SIGRTMAX	_NSIG
 
 /*
- * SA_FLAGS values:
+ * SA_FLAGS values:  POSIX 信号处理的标志
  *
  * SA_ONSTACK indicates that a registered stack_t will be used.
  * SA_RESTART flag to get restarting signals (which were the default long ago)

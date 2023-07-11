@@ -234,7 +234,7 @@ asmlinkage __visible void __do_softirq(void)
 	int max_restart = MAX_SOFTIRQ_RESTART;
 	struct softirq_action *h;
 	bool in_hardirq;
-	__u32 pending;
+	__u32 pending; //软中断挂起位掩码是一个表示当前 CPU 上待处理软中断的位字段。每个位代表一个特定的软中断。当相应的位被置位时，表示对应的软中断需要在适当的时机被处理。
 	int softirq_bit;
 
 	/*
@@ -242,35 +242,35 @@ asmlinkage __visible void __do_softirq(void)
 	 * softirq. A softirq handled such as network RX might set PF_MEMALLOC
 	 * again if the socket is related to swap
 	 */
-	current->flags &= ~PF_MEMALLOC;
+	current->flags &= ~PF_MEMALLOC;  //清除当前进程的 PF_MEMALLOC 标志位。这是因为在软中断处理过程中，当前任务的上下文被借用，因此需要将 PF_MEMALLOC 标志位屏蔽。
 
-	pending = local_softirq_pending();
-	account_irq_enter_time(current);
+	pending = local_softirq_pending(); //获取当前 CPU 上的软中断挂起状态。
+	account_irq_enter_time(current); //记录进入软中断的时间。
 
 	__local_bh_disable_ip(_RET_IP_, SOFTIRQ_OFFSET);
-	in_hardirq = lockdep_softirq_start();
+	in_hardirq = lockdep_softirq_start(); //启动软中断的锁依赖分析（lock dependency analysis），用于检测和跟踪锁的使用情况。
 
 restart:
 	/* Reset the pending bitmask before enabling irqs */
-	set_softirq_pending(0);
+	set_softirq_pending(0); //重置软中断挂起位掩码，以便在启用中断之前禁止软中断。
 
-	local_irq_enable();
+	local_irq_enable();		//启用本地中断，允许处理硬中断和软中断。
 
-	h = softirq_vec;
+	h = softirq_vec;  		//将 h 指针指向软中断向量表的起始地址。
 
-	while ((softirq_bit = ffs(pending))) {
+	while ((softirq_bit = ffs(pending))) { //迭代处理挂起的软中断位。 获取pending从地位到高位第一个被设置的位（第0位为1）
 		unsigned int vec_nr;
 		int prev_count;
 
-		h += softirq_bit - 1;
+		h += softirq_bit - 1;  //获取对应的中断向量
 
-		vec_nr = h - softirq_vec;
-		prev_count = preempt_count();
+		vec_nr = h - softirq_vec; //计算当前软中断的向量号。
+		prev_count = preempt_count(); //保存先前的抢占计数值，内核进行抢占时，会增加抢占计数值；当抢占结束时，会减少抢占计数值。通过跟踪抢占计数值，内核可以确定当前是否处于可抢占的状态，从而决定是否进行抢占。
 
-		kstat_incr_softirqs_this_cpu(vec_nr);
+		kstat_incr_softirqs_this_cpu(vec_nr); //增加当前 CPU 上的软中断计数
 
 		trace_softirq_entry(vec_nr);
-		h->action(h);
+		h->action(h); //调用软中断处理函数
 		trace_softirq_exit(vec_nr);
 		if (unlikely(prev_count != preempt_count())) {
 			pr_err("huh, entered softirq %u %s %p with preempt_count %08x, exited with %08x?\n",
@@ -278,27 +278,27 @@ restart:
 			       prev_count, preempt_count());
 			preempt_count_set(prev_count);
 		}
-		h++;
-		pending >>= softirq_bit;
+		h++; //将下一个软中断向量作为第零号向量
+		pending >>= softirq_bit; //跳过之前已经完成的位
 	}
 
-	rcu_bh_qs();
-	local_irq_disable();
+	rcu_bh_qs(); //执行 RCU 的底半部处理，用于延迟更新共享数据结构
+	local_irq_disable(); //禁用本地中断
 
-	pending = local_softirq_pending();
+	pending = local_softirq_pending(); //获取是否还有挂起的软中断
 	if (pending) {
 		if (time_before(jiffies, end) && !need_resched() &&
-		    --max_restart)
+		    --max_restart)  //检查是否还有处理时间、是否需要重新调度，以及是否还有重新启动的机会。
 			goto restart;
 
-		wakeup_softirqd();
+		wakeup_softirqd(); //唤醒软中断守护进程，以处理未处理的软中断。
 	}
 
-	lockdep_softirq_end(in_hardirq);
-	account_irq_exit_time(current);
-	__local_bh_enable(SOFTIRQ_OFFSET);
-	WARN_ON_ONCE(in_interrupt());
-	tsk_restore_flags(current, old_flags, PF_MEMALLOC);
+	lockdep_softirq_end(in_hardirq); //结束软中断的锁依赖分析。
+	account_irq_exit_time(current); //记录离开软中断的时间。
+	__local_bh_enable(SOFTIRQ_OFFSET); //启用本地底半部的执行。
+	WARN_ON_ONCE(in_interrupt()); //在中断上下文中检查是否正在执行软中断，如果是，则输出警告。
+	tsk_restore_flags(current, old_flags, PF_MEMALLOC); //恢复cpu状态
 }
 
 asmlinkage __visible void do_softirq(void)
@@ -306,12 +306,12 @@ asmlinkage __visible void do_softirq(void)
 	__u32 pending;
 	unsigned long flags;
 
-	if (in_interrupt())
+	if (in_interrupt()) //检查是否处于中断上下文中
 		return;
 
-	local_irq_save(flags);
+	local_irq_save(flags); //保存if标志位状态，并禁用本地cpu中断
 
-	pending = local_softirq_pending();
+	pending = local_softirq_pending(); //获取当前CPU上的软中断（softirq）的挂起状态。
 
 	if (pending)
 		do_softirq_own_stack();
@@ -427,7 +427,7 @@ void raise_softirq(unsigned int nr)
 void __raise_softirq_irqoff(unsigned int nr)
 {
 	trace_softirq_raise(nr);
-	or_softirq_pending(1UL << nr);
+	or_softirq_pending(1UL << nr);//设置软中断就绪标志位
 }
 
 void open_softirq(int nr, void (*action)(struct softirq_action *))
@@ -452,10 +452,10 @@ void __tasklet_schedule(struct tasklet_struct *t)
 
 	local_irq_save(flags);
 	t->next = NULL;
-	*__this_cpu_read(tasklet_vec.tail) = t;
-	__this_cpu_write(tasklet_vec.tail, &(t->next));
-	raise_softirq_irqoff(TASKLET_SOFTIRQ);
-	local_irq_restore(flags);
+	*__this_cpu_read(tasklet_vec.tail) = t;  //获取当前cpu tasklet任务链表的最后一个指针的下一个指针的地址，并将这个地址设置为 t，也就是将t插入到任务链表尾部
+	__this_cpu_write(tasklet_vec.tail, &(t->next)); //在将将任务链表里面的任务链表的尾地址设置t的next地址
+	raise_softirq_irqoff(TASKLET_SOFTIRQ); //激活TASKLET_SOFTIRQ软中断
+	local_irq_restore(flags); //恢复IF标志位
 }
 EXPORT_SYMBOL(__tasklet_schedule);
 
@@ -488,7 +488,7 @@ static void tasklet_action(struct softirq_action *a)
 
 	local_irq_disable();
 	list = __this_cpu_read(tasklet_vec.head);
-	__this_cpu_write(tasklet_vec.head, NULL);
+	__this_cpu_write(tasklet_vec.head, NULL); //清空tasklet列表
 	__this_cpu_write(tasklet_vec.tail, this_cpu_ptr(&tasklet_vec.head));
 	local_irq_enable();
 
@@ -497,7 +497,7 @@ static void tasklet_action(struct softirq_action *a)
 
 		list = list->next;
 
-		if (tasklet_trylock(t)) {
+		if (tasklet_trylock(t)) {  //设置 TASKLET_STATE_RUN 防止其他cpu也执行这个tasklet
 			if (!atomic_read(&t->count)) {
 				if (!test_and_clear_bit(TASKLET_STATE_SCHED,
 							&t->state))
@@ -511,9 +511,9 @@ static void tasklet_action(struct softirq_action *a)
 
 		local_irq_disable();
 		t->next = NULL;
-		*__this_cpu_read(tasklet_vec.tail) = t;
-		__this_cpu_write(tasklet_vec.tail, &(t->next));
-		__raise_softirq_irqoff(TASKLET_SOFTIRQ);
+		*__this_cpu_read(tasklet_vec.tail) = t; //获取任务链表最后节点的下一个节点，并在这个地址存放t
+		__this_cpu_write(tasklet_vec.tail, &(t->next)); //由于上一行代码的原因，此时任务链表的最后一个节点的下一个节点不再是 "任务链表最后节点的下一个节点" ，而是最后一个节点。所以这一步将其设置为t->next.
+		__raise_softirq_irqoff(TASKLET_SOFTIRQ); //再次激活tasklet
 		local_irq_enable();
 	}
 }

@@ -40,7 +40,7 @@ DECLARE_PER_CPU_SHARED_ALIGNED(irq_cpustat_t, irq_stat);
 
 #define inc_irq_stat(member)	this_cpu_inc(irq_stat.member)
 
-#define local_softirq_pending()	this_cpu_read(irq_stat.__softirq_pending)
+#define local_softirq_pending()	this_cpu_read(irq_stat.__softirq_pending) //读取当前 CPU 上的软中断挂起状态
 
 #define __ARCH_SET_SOFTIRQ_PENDING
 

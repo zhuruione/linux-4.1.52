@@ -189,8 +189,8 @@ extern char irq_entries_start[];
 #define VECTOR_UNDEFINED	(-1)
 #define VECTOR_RETRIGGERED	(-2)
 
-typedef int vector_irq_t[NR_VECTORS];
-DECLARE_PER_CPU(vector_irq_t, vector_irq);
+typedef int vector_irq_t[NR_VECTORS]; //，用于表示中断向量到中断号的映射关系。
+DECLARE_PER_CPU(vector_irq_t, vector_irq); //为每个cpu都分配一个vector_irq_t[256]数组
 
 #endif /* !ASSEMBLY_ */
 

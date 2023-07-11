@@ -78,7 +78,7 @@ static inline int kref_sub(struct kref *kref, unsigned int count,
 }
 
 /**
- * kref_put - decrement refcount for object.
+ * kref_put - decrement refcount for object. 对象的递减引用计数
  * @kref: object.
  * @release: pointer to the function that will clean up the object when the
  *	     last reference to the object is released.

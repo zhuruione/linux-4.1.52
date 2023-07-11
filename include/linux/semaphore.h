@@ -15,7 +15,7 @@
 /* Please don't access any members of this structure directly */
 struct semaphore {
 	raw_spinlock_t		lock;
-	unsigned int		count;
+	unsigned int		count;  //可用资源数量
 	struct list_head	wait_list;
 };
 

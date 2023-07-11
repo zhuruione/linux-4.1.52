@@ -151,7 +151,7 @@
 # define MAX_IO_APICS 64
 # define MAX_LOCAL_APIC 256
 #else
-# define MAX_IO_APICS 128
+# define MAX_IO_APICS 128 //用于定义系统中支持的最大 I/O APIC 数量
 # define MAX_LOCAL_APIC 32768
 #endif
 

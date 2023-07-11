@@ -118,7 +118,7 @@ static inline void write_cr0(unsigned long x)
 {
 	native_write_cr0(x);
 }
-
+//，用于从控制寄存器 CR2 中读取当前进程的页错误线性地址。在x86架构的处理器中，CR2 寄存器存储了最近一次产生页错误（Page Fault）的线性地址。
 static inline unsigned long read_cr2(void)
 {
 	return native_read_cr2();

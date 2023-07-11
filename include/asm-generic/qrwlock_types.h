@@ -10,7 +10,7 @@
 
 typedef struct qrwlock {
 	atomic_t		cnts;
-	arch_spinlock_t		lock;
+	arch_spinlock_t		lock;  //24位计数器
 } arch_rwlock_t;
 
 #define	__ARCH_RW_LOCK_UNLOCKED {		\

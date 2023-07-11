@@ -102,7 +102,7 @@ static inline bool __chk_range_not_ok(unsigned long addr, unsigned long size, un
  */
 
 struct exception_table_entry {
-	int insn, fixup, handler;
+	int insn/*访问进程地址空间的指令的线性地址*/, fixup/*insn发生缺页异常时，调用的汇编语言代码*/, handler;
 };
 /* This is not the generic standard exception_table_entry format */
 #define ARCH_HAS_SORT_EXTABLE
@@ -693,7 +693,7 @@ copy_from_user(void *to, const void __user *from, unsigned long n)
 {
 	int sz = __compiletime_object_size(to);
 
-	might_fault();
+	might_fault();//这个函数调用表示可能会产生页错误（Page Fault），它告诉内核在数据复制期间可能会发生错误，需要做相应的处理。
 
 	/*
 	 * While we would like to have the compiler do the checking for us

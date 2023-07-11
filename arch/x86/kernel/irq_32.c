@@ -142,14 +142,14 @@ void do_softirq_own_stack(void)
 	u32 *isp, *prev_esp;
 
 	curstk = current_stack();
-	irqstk = __this_cpu_read(softirq_stack);
+	irqstk = __this_cpu_read(softirq_stack); //获取软中断栈的栈顶指针，由于linux的栈内存向下增长，所以irqstk在内存的低位置
 
 	/* build the stack frame on the softirq stack */
-	isp = (u32 *) ((char *)irqstk + sizeof(*irqstk));
+	isp = (u32 *) ((char *)irqstk + sizeof(*irqstk)); //通过将栈顶指针位置加上栈空间大小获取中断栈的栈顶指针
 
 	/* Push the previous esp onto the stack */
-	prev_esp = (u32 *)irqstk;
-	*prev_esp = current_stack_pointer;
+	prev_esp = (u32 *)irqstk; //将prev_esp的地址设置为之前获取的软中断栈顶指针
+	*prev_esp = current_stack_pointer; //当前栈指针的值存储到指定的内存地址 prev_esp 所指向的位置，也就是在新获取的软中断
 
 	call_on_stack(__do_softirq, isp);
 }

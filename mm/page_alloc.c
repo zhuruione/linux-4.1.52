@@ -1035,16 +1035,16 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 
 	/* Find a page of the appropriate size in the preferred list */
 	for (current_order = order; current_order < MAX_ORDER; ++current_order) {
-		area = &(zone->free_area[current_order]);
-		if (list_empty(&area->free_list[migratetype]))
+		area = &(zone->free_area[current_order]);       //获取2^current_order空间大小的空闲块描述符地址
+		if (list_empty(&area->free_list[migratetype]))  //获取空闲块描述符中类型为migratetype的链表地址，若为空，则增加current_order
 			continue;
 
 		page = list_entry(area->free_list[migratetype].next,
-							struct page, lru);
-		list_del(&page->lru);
+							struct page, lru);  //获取这个空闲块的page描述符
+		list_del(&page->lru); //将这个page描述符从这个空闲块描述符中删除
 		rmv_page_order(page);
-		area->nr_free--;
-		expand(zone, page, order, current_order, area, migratetype);
+		area->nr_free--; //减少当前空闲块大小
+		expand(zone, page, order, current_order, area, migratetype); //重新分配空闲块（有可能使用了比order更大的空闲块）
 		set_freepage_migratetype(page, migratetype);
 		return page;
 	}
@@ -1310,9 +1310,17 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 	return NULL;
 }
 
-/*
+/**
  * Do the hard work of removing an element from the buddy allocator.
  * Call me with the zone->lock already held.
+ *
+ * @param migratetype ： migratetype是用于指定内存页的迁移类型（migrate type）
+    MIGRATE_UNMOVABLE：表示这些页不能被移动。通常用于关键的内核数据结构，如页表等。这样的页不会在内存紧张时被迁移。
+    MIGRATE_MOVABLE：表示这些页是可移动的。它们通常属于普通用户空间的页，可以在内存紧张时被迁移到其他空闲的物理页框中。
+    MIGRATE_RECLAIMABLE：表示这些页是可回收的，但不容易被移动。这些页可以在需要时被回收，但不会主动进行迁移。
+    MIGRATE_HIGHATOMIC：表示这些页是高优先级的原子页。它们通常用于高优先级的内核数据结构，比如原子分配的页。
+    MIGRATE_MOVABLE_RECLAIMABLE：表示这些页可以被回收且是可移动的。
+    MIGRATE_RESERVE：表示这些页被保留，不会用于一般的分配请求。这是一种保留内存的方式，确保系统有足够的内存供关键任务使用。
  */
 static struct page *__rmqueue(struct zone *zone, unsigned int order,
 						int migratetype)

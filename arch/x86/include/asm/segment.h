@@ -7,39 +7,39 @@
  * Constructor for a conventional segment GDT (or LDT) entry.
  * This is a macro so it can be used in initializers.
  */
-#define GDT_ENTRY(flags, base, limit)			\
-	((((base)  & _AC(0xff000000,ULL)) << (56-24)) |	\
-	 (((flags) & _AC(0x0000f0ff,ULL)) << 40) |	\
-	 (((limit) & _AC(0x000f0000,ULL)) << (48-16)) |	\
-	 (((base)  & _AC(0x00ffffff,ULL)) << 16) |	\
-	 (((limit) & _AC(0x0000ffff,ULL))))
+#define GDT_ENTRY(flags, base, limit)            \
+    ((((base)  & _AC(0xff000000,ULL)) << (56-24)) |    \
+     (((flags) & _AC(0x0000f0ff,ULL)) << 40) |    \
+     (((limit) & _AC(0x000f0000,ULL)) << (48-16)) |    \
+     (((base)  & _AC(0x00ffffff,ULL)) << 16) |    \
+     (((limit) & _AC(0x0000ffff,ULL))))
 
 /* Simple and small GDT entries for booting only: */
 
-#define GDT_ENTRY_BOOT_CS	2
-#define GDT_ENTRY_BOOT_DS	3
-#define GDT_ENTRY_BOOT_TSS	4
-#define __BOOT_CS		(GDT_ENTRY_BOOT_CS*8)
-#define __BOOT_DS		(GDT_ENTRY_BOOT_DS*8)
-#define __BOOT_TSS		(GDT_ENTRY_BOOT_TSS*8)
+#define GDT_ENTRY_BOOT_CS    2
+#define GDT_ENTRY_BOOT_DS    3
+#define GDT_ENTRY_BOOT_TSS    4
+#define __BOOT_CS        (GDT_ENTRY_BOOT_CS*8)
+#define __BOOT_DS        (GDT_ENTRY_BOOT_DS*8)
+#define __BOOT_TSS        (GDT_ENTRY_BOOT_TSS*8)
 
 /*
  * Bottom two bits of selector give the ring
  * privilege level
  */
-#define SEGMENT_RPL_MASK	0x3
+#define SEGMENT_RPL_MASK    0x3
 
 /* User mode is privilege level 3: */
-#define USER_RPL		0x3
+#define USER_RPL        0x3
 
 /* Bit 2 is Table Indicator (TI): selects between LDT or GDT */
-#define SEGMENT_TI_MASK		0x4
+#define SEGMENT_TI_MASK        0x4
 /* LDT segment has TI set ... */
-#define SEGMENT_LDT		0x4
+#define SEGMENT_LDT        0x4
 /* ... GDT has it cleared */
-#define SEGMENT_GDT		0x0
+#define SEGMENT_GDT        0x0
 
-#define GDT_ENTRY_INVALID_SEG	0
+#define GDT_ENTRY_INVALID_SEG    0
 
 #ifdef CONFIG_X86_32
 /*
@@ -154,9 +154,9 @@
 
 #include <asm/cache.h>
 
-#define GDT_ENTRY_KERNEL32_CS		1
-#define GDT_ENTRY_KERNEL_CS		2
-#define GDT_ENTRY_KERNEL_DS		3
+#define GDT_ENTRY_KERNEL32_CS        1
+#define GDT_ENTRY_KERNEL_CS        2
+#define GDT_ENTRY_KERNEL_DS        3
 
 /*
  * We cannot use the same code segment descriptor for user and kernel mode,
@@ -172,25 +172,25 @@
  *
  * thus USER_DS should be between 32-bit and 64-bit code selectors:
  */
-#define GDT_ENTRY_DEFAULT_USER32_CS	4
-#define GDT_ENTRY_DEFAULT_USER_DS	5
-#define GDT_ENTRY_DEFAULT_USER_CS	6
+#define GDT_ENTRY_DEFAULT_USER32_CS    4
+#define GDT_ENTRY_DEFAULT_USER_DS    5
+#define GDT_ENTRY_DEFAULT_USER_CS    6
 
 /* Needs two entries */
-#define GDT_ENTRY_TSS			8
+#define GDT_ENTRY_TSS            8
 /* Needs two entries */
-#define GDT_ENTRY_LDT			10
+#define GDT_ENTRY_LDT            10
 
-#define GDT_ENTRY_TLS_MIN		12
-#define GDT_ENTRY_TLS_MAX		14
+#define GDT_ENTRY_TLS_MIN        12
+#define GDT_ENTRY_TLS_MAX        14
 
 /* Abused to load per CPU data from limit */
-#define GDT_ENTRY_PER_CPU		15
+#define GDT_ENTRY_PER_CPU        15
 
 /*
  * Number of entries in the GDT table:
  */
-#define GDT_ENTRIES			16
+#define GDT_ENTRIES            16
 
 /*
  * Segment selector values corresponding to the above entries:
@@ -198,42 +198,42 @@
  * Note, selectors also need to have a correct RPL,
  * expressed with the +3 value for user-space selectors:
  */
-#define __KERNEL32_CS			(GDT_ENTRY_KERNEL32_CS*8)
-#define __KERNEL_CS			(GDT_ENTRY_KERNEL_CS*8)
-#define __KERNEL_DS			(GDT_ENTRY_KERNEL_DS*8)
-#define __USER32_CS			(GDT_ENTRY_DEFAULT_USER32_CS*8 + 3)
-#define __USER_DS			(GDT_ENTRY_DEFAULT_USER_DS*8 + 3)
-#define __USER32_DS			__USER_DS
-#define __USER_CS			(GDT_ENTRY_DEFAULT_USER_CS*8 + 3)
-#define __PER_CPU_SEG			(GDT_ENTRY_PER_CPU*8 + 3)
+#define __KERNEL32_CS            (GDT_ENTRY_KERNEL32_CS*8)
+#define __KERNEL_CS            (GDT_ENTRY_KERNEL_CS*8) //2 * 8 = 16
+#define __KERNEL_DS            (GDT_ENTRY_KERNEL_DS*8)
+#define __USER32_CS            (GDT_ENTRY_DEFAULT_USER32_CS*8 + 3)
+#define __USER_DS            (GDT_ENTRY_DEFAULT_USER_DS*8 + 3)
+#define __USER32_DS            __USER_DS
+#define __USER_CS            (GDT_ENTRY_DEFAULT_USER_CS*8 + 3)
+#define __PER_CPU_SEG            (GDT_ENTRY_PER_CPU*8 + 3)
 
 /* TLS indexes for 64-bit - hardcoded in arch_prctl(): */
-#define FS_TLS				0
-#define GS_TLS				1
+#define FS_TLS                0
+#define GS_TLS                1
 
-#define GS_TLS_SEL			((GDT_ENTRY_TLS_MIN+GS_TLS)*8 + 3)
-#define FS_TLS_SEL			((GDT_ENTRY_TLS_MIN+FS_TLS)*8 + 3)
+#define GS_TLS_SEL            ((GDT_ENTRY_TLS_MIN+GS_TLS)*8 + 3)
+#define FS_TLS_SEL            ((GDT_ENTRY_TLS_MIN+FS_TLS)*8 + 3)
 
 #endif
 
 #ifndef CONFIG_PARAVIRT
-# define get_kernel_rpl()		0
+# define get_kernel_rpl()        0
 #endif
 
-#define IDT_ENTRIES			256
-#define NUM_EXCEPTION_VECTORS		32
+#define IDT_ENTRIES            256
+#define NUM_EXCEPTION_VECTORS        32
 
 /* Bitmask of exception vectors which push an error code on the stack: */
-#define EXCEPTION_ERRCODE_MASK		0x00027d00
+#define EXCEPTION_ERRCODE_MASK        0x00027d00
 
-#define GDT_SIZE			(GDT_ENTRIES*8)
+#define GDT_SIZE            (GDT_ENTRIES*8)
 
 /*
  * GDT_ENTRY_TLS_ENTRIES是一个宏定义，用于在IA-32和x86-64体系结构中的全局描述符表（GDT）中设置线程本地存储（TLS）条目。该宏定义在set_thread_area()函数中使用，
  * 该函数将TLS条目设置为GDT中的一个条目。如果该值在范围内，则set_thread_area()将u_info指向的TLS描述符写入线程的TLS数组1.
  * */
-#define GDT_ENTRY_TLS_ENTRIES		3
-#define TLS_SIZE			(GDT_ENTRY_TLS_ENTRIES* 8)
+#define GDT_ENTRY_TLS_ENTRIES        3
+#define TLS_SIZE            (GDT_ENTRY_TLS_ENTRIES* 8)
 
 #ifdef __KERNEL__
 
@@ -257,28 +257,28 @@ extern const char early_idt_handler_array[NUM_EXCEPTION_VECTORS][EARLY_IDT_HANDL
  * Load a segment. Fall back on loading the zero
  * segment if something goes wrong..
  */
-#define loadsegment(seg, value)						\
-do {									\
-	unsigned short __val = (value);					\
-									\
-	asm volatile("						\n"	\
-		     "1:	movl %k0,%%" #seg "		\n"	\
-									\
-		     ".section .fixup,\"ax\"			\n"	\
-		     "2:	xorl %k0,%k0			\n"	\
-		     "		jmp 1b				\n"	\
-		     ".previous					\n"	\
-									\
-		     _ASM_EXTABLE(1b, 2b)				\
-									\
-		     : "+r" (__val) : : "memory");			\
+#define loadsegment(seg, value)                        \
+do {                                    \
+    unsigned short __val = (value);                    \
+                                    \
+    asm volatile("						\n"    \
+             "1:	movl %k0,%%" #seg "		\n"    \
+                                    \
+             ".section .fixup,\"ax\"			\n"    \
+             "2:	xorl %k0,%k0			\n"    \
+             "		jmp 1b				\n"    \
+             ".previous					\n"    \
+                                    \
+             _ASM_EXTABLE(1b, 2b)                \
+                                    \
+             : "+r" (__val) : : "memory");            \
 } while (0)
 
 /*
  * Save a segment register away:
  */
-#define savesegment(seg, value)				\
-	asm("mov %%" #seg ",%0":"=r" (value) : : "memory")
+#define savesegment(seg, value)                \
+    asm("mov %%" #seg ",%0":"=r" (value) : : "memory")
 
 /*
  * x86-32 user GS accessors:
@@ -297,7 +297,7 @@ do {									\
 #  define lazy_save_gs(v)		do { } while (0)
 #  define lazy_load_gs(v)		do { } while (0)
 # endif	/* X86_32_LAZY_GS */
-#endif	/* X86_32 */
+#endif    /* X86_32 */
 
 #endif /* !__ASSEMBLY__ */
 #endif /* __KERNEL__ */

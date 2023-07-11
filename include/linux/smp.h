@@ -179,7 +179,7 @@ static inline void smp_init(void) { }
   extern unsigned int debug_smp_processor_id(void);
 # define smp_processor_id() debug_smp_processor_id()
 #else
-# define smp_processor_id() raw_smp_processor_id()
+# define smp_processor_id() raw_smp_processor_id() //返回当前代码所在的处理器核心的标识符（ID）
 #endif
 
 #define get_cpu()		({ preempt_disable(); smp_processor_id(); })

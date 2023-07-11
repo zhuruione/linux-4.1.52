@@ -49,19 +49,19 @@ enum pid_type
 
 struct upid {
 	/* Try to keep pid_chain in the same cacheline as nr for find_vpid */
-	int nr;
-	struct pid_namespace *ns;
-	struct hlist_node pid_chain;
+	int nr; //表示进程ID的值。
+	struct pid_namespace *ns; //指向该进程ID所处的namespace。
+    struct hlist_node pid_chain;
 };
 
 struct pid
 {
 	atomic_t count;
-	unsigned int level;
+	unsigned int level; //在Linux内核中，pid结构体中的level成员变量表示该pid在pid_namespace中处于第几层。当level=0时表示是global namespace，即最高层。
 	/* lists of tasks that use this pid */
-	struct hlist_head tasks[PIDTYPE_MAX];
+	struct hlist_head tasks[PIDTYPE_MAX]; //使用该pid结构体的进程描述符集合
 	struct rcu_head rcu;
-	struct upid numbers[1];
+	struct upid numbers[1]; //存储每层的pid信息的变长数组，长度就是上面的level  这个线程可能存在在不同的命名空间中，每个命名空间的pid都可能不太相同
 };
 
 extern struct pid init_struct_pid;
@@ -135,7 +135,7 @@ static inline struct pid_namespace *ns_of_pid(struct pid *pid)
 {
 	struct pid_namespace *ns = NULL;
 	if (pid)
-		ns = pid->numbers[pid->level].ns;
+		ns = pid->numbers[pid->level].ns; //获取进程当前这一层ns
 	return ns;
 }
 

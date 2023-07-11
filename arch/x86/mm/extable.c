@@ -127,7 +127,7 @@ search_extable(const struct exception_table_entry *first,
 		const struct exception_table_entry *mid;
 		unsigned long addr;
 
-		mid = ((last - first) >> 1) + first;
+		mid = ((last - first) >> 1) + first; //二分法查找
 		addr = ex_insn_addr(mid);
 		if (addr < value)
 			first = mid + 1;

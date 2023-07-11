@@ -437,7 +437,7 @@ static inline int pte_same(pte_t a, pte_t b)
 
 static inline int pte_present(pte_t a)
 {
-	return pte_flags(a) & (_PAGE_PRESENT | _PAGE_PROTNONE);
+	return pte_flags(a) & (_PAGE_PRESENT | _PAGE_PROTNONE); //检查这个条目的存在位（也就是表示页面是否在物理内存中的位）是否被设置
 }
 
 #define pte_accessible pte_accessible
@@ -643,7 +643,7 @@ static inline int pgd_none(pgd_t pgd)
  * this macro returns the index of the entry in the pgd page which would
  * control the given virtual address
  */
-#define pgd_index(address) (((address) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
+#define pgd_index(address) (((address) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1)) //获取address虚拟地址的全局页表目录的下标
 
 /*
  * pgd_offset() returns a (pgd_t *)

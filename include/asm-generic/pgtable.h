@@ -287,7 +287,7 @@ static inline pgprot_t pgprot_modify(pgprot_t oldprot, pgprot_t newprot)
  */
 
 #define pgd_addr_end(addr, end)						\
-({	unsigned long __boundary = ((addr) + PGDIR_SIZE) & PGDIR_MASK;	\
+({	unsigned long __boundary = ((addr) + PGDIR_SIZE) & PGDIR_MASK;	/*__boundary获取 得到页全局目录项地址的边界*/\
 	(__boundary - 1 < (end) - 1)? __boundary: (end);		\
 })
 

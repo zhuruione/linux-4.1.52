@@ -1262,10 +1262,26 @@ static inline int mlock_future_check(struct mm_struct *mm,
 	return 0;
 }
 
-/*
- * The caller must hold down_write(&current->mm->mmap_sem).
- */
 
+/**
+ * The caller must hold down_write(&current->mm->mmap_sem).
+ * @param file 要映射的文件对象，表示要将哪个文件映射到内存中。
+ * @param addr 映射的起始虚拟地址，即希望映射到进程虚拟地址空间的起始位置。如果设置为0，内核会选择一个适当的地址。
+ * @param len 映射的长度，表示要映射多少字节的数据。
+ * @param prot 保护权限，表示映射区域的访问权限，可以是以下组合之一：
+                     PROT_READ：可读
+                     PROT_WRITE：可写
+                     PROT_EXEC：可执行
+                     PROT_NONE：无权限
+ * @param flagsflags：标志位，用于指定映射的属性，可以是以下之一或其组合：
+                        MAP_SHARED：共享映射，多个进程可以共享同一块物理内存。
+                        MAP_PRIVATE：私有映射，每个进程都有自己的一份数据拷贝。
+                        MAP_FIXED：强制使用指定的虚拟地址，如果已被占用则失败。
+                        等等
+ * @param pgoff 页偏移量，表示文件映射开始的页偏移量，用于指定文件中的起始位置。
+ * @param populate 用于指示是否预先填充映射区域的页框。如果指定了该参数，内核会尽量预先分配物理内存。
+ * @return 新线性区的线性地址
+ */
 unsigned long do_mmap_pgoff(struct file *file, unsigned long addr,
 			unsigned long len, unsigned long prot,
 			unsigned long flags, unsigned long pgoff,
@@ -1306,9 +1322,9 @@ unsigned long do_mmap_pgoff(struct file *file, unsigned long addr,
 		return -ENOMEM;
 
 	/* Obtain the address to map to. we verify (or select) it and ensure
-	 * that it represents a valid section of the address space.
+	 * that it represents（代表） a valid（有效） section of the address space.
 	 */
-	addr = get_unmapped_area(file, addr, len, pgoff, flags);
+	addr = get_unmapped_area(file, addr, len, pgoff, flags); //获取线性地址区间
 	if (addr & ~PAGE_MASK)
 		return addr;
 
@@ -2010,7 +2026,15 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 	return addr;
 }
 #endif
-
+/**
+ * 获取一个空闲的地址空间
+ * @param file 文件描述符
+ * @param addr 地址
+ * @param len 长度
+ * @param pgoff
+ * @param flags
+ * @return
+ */
 unsigned long
 get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 		unsigned long pgoff, unsigned long flags)
@@ -2045,7 +2069,7 @@ get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 
 EXPORT_SYMBOL(get_unmapped_area);
 
-/* Look up the first VMA which satisfies  addr < vm_end,  NULL if none. */
+/* Look up the first VMA which satisfies  addr < vm_end,  NULL if none.   查找给定地址addr最邻近区的 vm_area_struct*/
 struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 {
 	struct rb_node *rb_node;
@@ -2062,7 +2086,7 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 	while (rb_node) {
 		struct vm_area_struct *tmp;
 
-		tmp = rb_entry(rb_node, struct vm_area_struct, vm_rb);
+		tmp = rb_entry(rb_node, struct vm_area_struct, vm_rb); //获取rb_node所属的vm_area_struct
 
 		if (tmp->vm_end > addr) {
 			vma = tmp;

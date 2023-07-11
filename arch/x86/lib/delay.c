@@ -120,7 +120,7 @@ inline void __const_udelay(unsigned long xloops)
 	asm("mull %%edx"
 		:"=d" (xloops), "=&a" (d0)
 		:"1" (xloops), "0"
-		(this_cpu_read(cpu_info.loops_per_jiffy) * (HZ/4)));
+		(this_cpu_read(cpu_info.loops_per_jiffy) * ( HZ/4)));
 
 	__delay(++xloops);
 }

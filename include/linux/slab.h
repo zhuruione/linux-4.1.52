@@ -422,7 +422,7 @@ static __always_inline void *kmalloc(size_t size, gfp_t flags)
 			return kmalloc_large(size, flags);
 #ifndef CONFIG_SLOB
 		if (!(flags & GFP_DMA)) {
-			int index = kmalloc_index(size);
+			int index = kmalloc_index(size); //获取size相应大小的kmem_cache节点
 
 			if (!index)
 				return ZERO_SIZE_PTR;

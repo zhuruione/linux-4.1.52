@@ -454,7 +454,7 @@ static struct task_struct *find_child_reaper(struct task_struct *father)
 	__releases(&tasklist_lock)
 	__acquires(&tasklist_lock)
 {
-	struct pid_namespace *pid_ns = task_active_pid_ns(father);
+	struct pid_namespace *pid_ns = task_active_pid_ns(father); //获取father进程的ns
 	struct task_struct *reaper = pid_ns->child_reaper;
 
 	if (likely(reaper != father))
@@ -543,12 +543,12 @@ static void reparent_leader(struct task_struct *father, struct task_struct *p,
 /*
  * This does two things:
  *
- * A.  Make init inherit all the child processes
- * B.  Check to see if any process groups have become orphaned
+ * A.  Make init inherit（继承） all the child processes
+ * B.  Check to see if any process groups have become orphaned(孤儿)
  *	as a result of our exiting, and if they have any stopped
  *	jobs, send them a SIGHUP and then a SIGCONT.  (POSIX 3.2.2.2)
  */
-static void forget_original_parent(struct task_struct *father,
+static void forget_original_parent(struct task_struct *father,  //father ---将要结束的进程
 					struct list_head *dead)
 {
 	struct task_struct *p, *t, *reaper;
@@ -558,11 +558,11 @@ static void forget_original_parent(struct task_struct *father,
 
 	/* Can drop and reacquire tasklist_lock */
 	reaper = find_child_reaper(father);
-	if (list_empty(&father->children))
+	if (list_empty(&father->children)) //如果当前进程没有了子进程 则返回
 		return;
 
-	reaper = find_new_reaper(father, reaper);
-	list_for_each_entry(p, &father->children, sibling) {
+	reaper = find_new_reaper(father, reaper); //获得新的当前命名空间的init进程
+	list_for_each_entry(p, &father->children, sibling) { //遍历所有子进程，将子进程的父进程设置为reper
 		for_each_thread(p, t) {
 			t->real_parent = reaper;
 			BUG_ON((!t->ptrace) != (t->parent == father));
@@ -603,7 +603,7 @@ static void exit_notify(struct task_struct *tsk, int group_dead)
 				thread_group_empty(tsk) &&
 				!ptrace_reparented(tsk) ?
 			tsk->exit_signal : SIGCHLD;
-		autoreap = do_notify_parent(tsk, sig);
+		autoreap = do_notify_parent(tsk, sig); //如果父进程忽略了，进行自我删除，则返回 true。
 	} else if (thread_group_leader(tsk)) {
 		autoreap = thread_group_empty(tsk) &&
 			do_notify_parent(tsk, tsk->exit_signal);
@@ -622,7 +622,7 @@ static void exit_notify(struct task_struct *tsk, int group_dead)
 
 	list_for_each_entry_safe(p, n, &dead, ptrace_entry) {
 		list_del_init(&p->ptrace_entry);
-		release_task(p);
+		release_task(p);  //释放进程空间
 	}
 }
 
@@ -682,7 +682,7 @@ void do_exit(long code)
 	 * We're taking recursive faults here in do_exit. Safest is to just
 	 * leave this task alone and wait for reboot.
 	 */
-	if (unlikely(tsk->flags & PF_EXITING)) {
+	if (unlikely(tsk->flags & PF_EXITING)) { //说明进入了do_exit()递归
 		pr_alert("Fixing recursive fault but reboot is needed!\n");
 		/*
 		 * We can do this unlocked here. The futex code uses
@@ -727,22 +727,22 @@ void do_exit(long code)
 		tty_audit_exit();
 	audit_free(tsk);
 
-	tsk->exit_code = code;
+	tsk->exit_code = code; //设置exit_code
 	taskstats_exit(tsk, group_dead);
 
-	exit_mm(tsk);
+	exit_mm(tsk); //分页
 
 	if (group_dead)
 		acct_process();
 	trace_sched_process_exit(tsk);
 
-	exit_sem(tsk);
+	exit_sem(tsk);//信号量
 	exit_shm(tsk);
-	exit_files(tsk);
-	exit_fs(tsk);
+	exit_files(tsk); //打开文件描述符
+	exit_fs(tsk); //文件系统
 	if (group_dead)
 		disassociate_ctty(1);
-	exit_task_namespaces(tsk);
+	exit_task_namespaces(tsk); //命名空间
 	exit_task_work(tsk);
 	exit_thread();
 
@@ -762,7 +762,7 @@ void do_exit(long code)
 	flush_ptrace_hw_breakpoint(tsk);
 
 	TASKS_RCU(tasks_rcu_i = __srcu_read_lock(&tasks_rcu_exit_srcu));
-	exit_notify(tsk, group_dead);
+	exit_notify(tsk, group_dead);                                        //⭐⭐
 	proc_exit_connector(tsk);
 #ifdef CONFIG_NUMA
 	task_lock(tsk);
@@ -846,6 +846,7 @@ SYSCALL_DEFINE1(exit, int, error_code)
 /*
  * Take down every thread in the group.  This is called by fatal signals
  * as well as by sys_exit_group (below).
+ * 杀死属于current线程组的所有进程
  */
 void
 do_group_exit(int exit_code)
@@ -854,7 +855,7 @@ do_group_exit(int exit_code)
 
 	BUG_ON(exit_code & 0x80); /* core dumps don't get here */
 
-	if (signal_group_exit(sig))
+	if (signal_group_exit(sig))  //判断SIGNAL_GROUP_EXIT是否不为0,若不为0,说明内核已经开始为线程组执行退出，在这种情况下，将sig->group_exit_code中的值作为退出码，直接执行do_exit
 		exit_code = sig->group_exit_code;
 	else if (!thread_group_empty(current)) {
 		struct sighand_struct *const sighand = current->sighand;
@@ -866,7 +867,7 @@ do_group_exit(int exit_code)
 		else {
 			sig->group_exit_code = exit_code;
 			sig->flags = SIGNAL_GROUP_EXIT;
-			zap_other_threads(current);
+			zap_other_threads(current);//杀死current线程组的其他进程
 		}
 		spin_unlock_irq(&sighand->siglock);
 	}

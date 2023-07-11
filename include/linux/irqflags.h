@@ -117,7 +117,7 @@
 
 #else /* !CONFIG_TRACE_IRQFLAGS */
 
-#define local_irq_enable()	do { raw_local_irq_enable(); } while (0)
+#define local_irq_enable()	do { raw_local_irq_enable(); } while (0) //启用本地中断，允许处理硬中断和软中断。
 #define local_irq_disable()	do { raw_local_irq_disable(); } while (0)
 #define local_irq_save(flags)					\
 	do {							\

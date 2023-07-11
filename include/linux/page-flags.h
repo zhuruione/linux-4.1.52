@@ -74,15 +74,15 @@
 enum pageflags {
 	PG_locked,		/* Page is locked. Don't touch. */
 	PG_error,
-	PG_referenced,
-	PG_uptodate,
-	PG_dirty,
-	PG_lru,
-	PG_active,
-	PG_slab,
+	PG_referenced,   /*各个被访问过的页*/
+	PG_uptodate,    /*在完成读操作后置位，除非发生磁盘io错误*/
+	PG_dirty,       /*页已经被修改*/
+	PG_lru,         /*页在活动或非活动链表中*/
+	PG_active,      /*页在活动链表中*/
+	PG_slab,        /*包含在slab中的页框*/
 	PG_owner_priv_1,	/* Owner use. If pagecache, fs may use*/
 	PG_arch_1,
-	PG_reserved,
+	PG_reserved,        /*页框留给内核代码或未被使用*/
 	PG_private,		/* If pagecache, has fs-private data */
 	PG_private_2,		/* If pagecache, has fs aux data */
 	PG_writeback,		/* Page is under writeback */

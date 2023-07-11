@@ -20,15 +20,21 @@ struct pidmap {
 #define PIDMAP_ENTRIES		((PID_MAX_LIMIT+BITS_PER_PAGE-1)/BITS_PER_PAGE)
 
 struct fs_pin;
-
+/*
+ * pid_namespace是Linux内核中的一种命名空间，它是一种隔离机制，
+ * 用于隔离进程ID（PID）空间。PID命名空间允许在同一系统上运行多
+ * 个进程，而这些进程可以具有相同的PID。PID命名空间还可以用于在
+ * 容器中运行进程，以便在容器中运行的进程可以具有与主机系统不同的
+ * PID。
+ * */
 struct pid_namespace {
 	struct kref kref;
 	struct pidmap pidmap[PIDMAP_ENTRIES];
 	struct rcu_head rcu;
 	int last_pid;
-	unsigned int nr_hashed;
-	struct task_struct *child_reaper;
-	struct kmem_cache *pid_cachep;
+	unsigned int nr_hashed; //这层pid已经使用的数量
+	struct task_struct *child_reaper; //保存当前命名空间的初始化进程
+    struct kmem_cache *pid_cachep; //用于缓存pid结构体。当进程创建时，内核会从pid_cachep中分配一个pid结构体
 	unsigned int level;
 	struct pid_namespace *parent;
 #ifdef CONFIG_PROC_FS

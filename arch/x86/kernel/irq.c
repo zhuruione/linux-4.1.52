@@ -185,16 +185,16 @@ u64 arch_irq_stat(void)
  */
 __visible unsigned int __irq_entry do_IRQ(struct pt_regs *regs)
 {
-	struct pt_regs *old_regs = set_irq_regs(regs);
+	struct pt_regs *old_regs = set_irq_regs(regs); //设置cpu寄存器，并保存旧的寄存器内容
 
 	/* high bit used in ret_from_ code  */
-	unsigned vector = ~regs->orig_ax;
+	unsigned vector = ~regs->orig_ax; //获取中断发起的中断向量
 	unsigned irq;
 
-	irq_enter();
+	irq_enter(); //递增saved_preempt_count
 	exit_idle();
 
-	irq = __this_cpu_read(vector_irq[vector]);
+	irq = __this_cpu_read(vector_irq[vector]); //获取当前cpu与给定中断向量（vector）相关联的中断号（irq）。
 
 	if (!handle_irq(irq, regs)) {
 		ack_APIC_irq();
@@ -210,7 +210,7 @@ __visible unsigned int __irq_entry do_IRQ(struct pt_regs *regs)
 
 	irq_exit();
 
-	set_irq_regs(old_regs);
+	set_irq_regs(old_regs);  //恢复寄存器
 	return 1;
 }
 

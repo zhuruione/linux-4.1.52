@@ -23,7 +23,7 @@ static void __dump_stack(void)
 #ifdef CONFIG_SMP
 static atomic_t dump_lock = ATOMIC_INIT(-1);
 
-asmlinkage __visible void dump_stack(void)
+asmlinkage __visible void dump_stack(void) //dump_stack() 的目的是将堆栈跟踪打印到系统日志或控制台上，显示导致当前执行点的函数调用序列。
 {
 	unsigned long flags;
 	int was_locked;
