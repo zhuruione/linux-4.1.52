@@ -168,7 +168,7 @@ void acct_account_cputime(struct task_struct *tsk)
 }
 
 /**
- * acct_clear_integrals - clear the mm integral fields in task_struct
+ * acct_clear_integrals - clear the mm integral（完整的） fields in task_struct
  * @tsk: task_struct whose accounting fields are cleared
  */
 void acct_clear_integrals(struct task_struct *tsk)

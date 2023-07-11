@@ -13,9 +13,16 @@
 #define CLONE_VFORK	0x00004000	/* set if the parent wants the child to wake it up on mm_release */
 #define CLONE_PARENT	0x00008000	/* set if we want to have the same parent as the cloner */
 #define CLONE_THREAD	0x00010000	/* Same thread group? */
+/*
+ * CLONE_NEWNS是Linux Namespace机制中的一个标志，用于指定Mount Namespace。
+ * Mount Namespace是Linux Namespace机制中的第一个被加入的namespace，它描述
+ * 了进程的文件hierarchy。当用clone或者unshare函数创建新的mount namespace时，
+ * 新创建的namespace将拷贝一份老namespace里的挂载点列表，但从这之后，他们就没有
+ * 关系了，通过mount和umount增加和删除各自namespace里面的挂载点都不会相互影响12。
+ * */
 #define CLONE_NEWNS	0x00020000	/* New mount namespace group */
 #define CLONE_SYSVSEM	0x00040000	/* share system V SEM_UNDO semantics */
-#define CLONE_SETTLS	0x00080000	/* create a new TLS for the child */
+#define CLONE_SETTLS	0x00080000	/* create a new TLS（线程局部存储） for the child */
 #define CLONE_PARENT_SETTID	0x00100000	/* set the TID in the parent */
 #define CLONE_CHILD_CLEARTID	0x00200000	/* clear the TID in the child */
 #define CLONE_DETACHED		0x00400000	/* Unused, ignored */
@@ -29,7 +36,6 @@
 #define CLONE_NEWPID		0x20000000	/* New pid namespace */
 #define CLONE_NEWNET		0x40000000	/* New network namespace */
 #define CLONE_IO		0x80000000	/* Clone io context */
-
 /*
  * Scheduling policies
  */

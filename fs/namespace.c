@@ -26,7 +26,17 @@
 #include <linux/task_work.h>
 #include "pnode.h"
 #include "internal.h"
-
+/*
+ * Linux中的namespace是一种内核级别的隔离机制，用于隔离和虚拟化系统资源，
+ * 包括进程ID、主机名、用户ID、网络访问、进程间通讯和文件系统等。Linux内核
+ * 实现了6种不同类型的Namespace，分别是：Mount Namespace，用来隔离各个
+ * 进程看到的挂载点视图；Process ID Namespace，用来隔离进程ID；Networ
+ * k Namespace，用来隔离网络访问；InterProcess Communication Names
+ * pace，用来隔离System V IPC和POSIX message queues；UTS Namespac
+ * e，用来隔离nodename (hostname) 和 domainname两个系统标识；User ID
+ * Namespace，用来隔离用户ID。每一个Namespace都有自己的API和系统调用，每
+ * 一个进程都绑定在特定命名空间中，且只能查看和操作绑定在此名字空间的资源.
+ * */
 /* Maximum number of mounts in a mount namespace */
 unsigned int sysctl_mount_max __read_mostly = 100000;
 

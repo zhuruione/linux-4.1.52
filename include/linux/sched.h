@@ -772,7 +772,7 @@ struct signal_struct {
 #define SIGNAL_CLD_CONTINUED	0x00000020
 #define SIGNAL_CLD_MASK		(SIGNAL_CLD_STOPPED|SIGNAL_CLD_CONTINUED)
 
-#define SIGNAL_UNKILLABLE	0x00000040 /* for init: ignore fatal signals */
+#define SIGNAL_UNKILLABLE	0x00000040 /* for init: ignore fatal（致命） signals */
 
 #define SIGNAL_STOP_MASK (SIGNAL_CLD_MASK | SIGNAL_STOP_STOPPED | \
 			  SIGNAL_STOP_CONTINUED)
@@ -798,6 +798,7 @@ struct user_struct {
 	atomic_t __count;	/* reference count */
 	atomic_t processes;	/* How many processes does this user have? */
 	atomic_t sigpending;	/* How many pending signals does this user have? */
+
 #ifdef CONFIG_INOTIFY_USER
 	atomic_t inotify_watches; /* How many inotify watches does this user have? */
 	atomic_t inotify_devs;	/* How many inotify devs does this user have opened? */
@@ -1305,7 +1306,7 @@ enum perf_event_task_context {
 struct task_struct {
 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
 	void *stack;
-	atomic_t usage;
+	atomic_t usage;  //进程的使用计数
 	unsigned int flags;	/* per process flags, defined below */
 	unsigned int ptrace;
 
@@ -1473,8 +1474,9 @@ struct task_struct {
 
 /* process credentials */
 	const struct cred __rcu *ptracer_cred; /* Tracer's credentials at attach */
-	const struct cred __rcu *real_cred; /* objective and real subjective task
-					 * credentials (COW) */
+	const struct cred __rcu *real_cred; /*客观和真实的主观任务证书
+                        * objective and real subjective task
+					    * credentials (COW) */
 	const struct cred __rcu *cred;	/* effective (overridable) subjective task
 					 * credentials (COW) */
 	char comm[TASK_COMM_LEN]; /* executable name excluding path
@@ -1697,6 +1699,7 @@ struct task_struct {
 	struct latency_record latency_record[LT_SAVECOUNT];
 #endif
 	/*
+	 * io复用用途
 	 * time slack values; these are used to round up poll() and
 	 * select() etc timeout values. These are in nanoseconds.
 	 */
@@ -2665,7 +2668,7 @@ static inline void unlock_task_sighand(struct task_struct *tsk,
  * threadgroup_change_begin - mark the beginning of changes to a threadgroup
  * @tsk: task causing the changes
  *
- * All operations which modify a threadgroup - a new thread joining the
+ * All operations which modify（修改） a threadgroup - a new thread joining the
  * group, death of a member thread (the assertion of PF_EXITING) and
  * exec(2) dethreading the process and replacing the leader - are wrapped
  * by threadgroup_change_{begin|end}().  This is to provide a place which
@@ -2696,8 +2699,8 @@ static inline void threadgroup_change_end(struct task_struct *tsk)
 
 static inline void setup_thread_stack(struct task_struct *p, struct task_struct *org)
 {
-	*task_thread_info(p) = *task_thread_info(org);
-	task_thread_info(p)->task = p;
+	*task_thread_info(p) = *task_thread_info(org);  //将current进程描述符的内容复制到p所指的结构中
+	task_thread_info(p)->task = p;                  //将p->task置为p
 }
 
 /*

@@ -491,8 +491,8 @@ struct perf_event;
 struct thread_struct {
 	/* Cached TLS descriptors: */
 	struct desc_struct	tls_array[GDT_ENTRY_TLS_ENTRIES];
-	unsigned long		sp0;
-	unsigned long		sp;
+	unsigned long		sp0; //线程栈的栈底指针 栈的增长方向是从高地址到低地址
+	unsigned long		sp;  //线程栈指针
 #ifdef CONFIG_X86_32
 	unsigned long		sysenter_cs;
 #else
@@ -904,7 +904,7 @@ extern unsigned long thread_saved_pc(struct task_struct *tsk);
  */
 #define thread_saved_pc(t)	(*(unsigned long *)((t)->thread.sp - 8))
 
-#define task_pt_regs(tsk)	((struct pt_regs *)(tsk)->thread.sp0 - 1)
+#define task_pt_regs(tsk)	((struct pt_regs *)(tsk)->thread.sp0 - 1)  //先获取tsk的栈底指针，这个指针类型为long  减去一个long地址后指针所指的数据为sp
 extern unsigned long KSTK_ESP(struct task_struct *task);
 
 #endif /* CONFIG_X86_64 */

@@ -48,7 +48,9 @@
 struct task_struct;
 #include <asm/processor.h>
 #include <linux/atomic.h>
-
+/*
+ * thread_info:线程描述符
+ * */
 struct thread_info {
 	struct task_struct	*task;		/* main task structure */
 	__u32			flags;		/* low level flags */

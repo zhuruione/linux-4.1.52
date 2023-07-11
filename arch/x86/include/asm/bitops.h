@@ -304,7 +304,7 @@ static inline int test_and_change_bit(long nr, volatile unsigned long *addr)
 {
 	GEN_BINARY_RMWcc(LOCK_PREFIX "btc", *addr, "Ir", nr, "%0", "c");
 }
-
+/*constant_test_bit是一个宏定义，用于在Linux内核中测试位。它是test_bit的一个变体，用于在编译时确定位号的情况下进行优化。如果位号是编译时已知的常量，则展开为constant_test_bit函数的调用，否则展开为variable_test_bit函数的调用*/
 static __always_inline int constant_test_bit(long nr, const volatile unsigned long *addr)
 {
 	return ((1UL << (nr & (BITS_PER_LONG-1))) &

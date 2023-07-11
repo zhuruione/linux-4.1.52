@@ -455,6 +455,14 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
  * required ordering.
  *
  * If possible use READ_ONCE/ASSIGN_ONCE instead.
+ * 防止编译器合并或重新获取访问。编译器还被禁止重新排序ACCESS_ONCE()的连续实例，但仅当编译器
+ * 知道某些特定的排序时。使编译器了解排序的一种方法是将两个ACCESS_ONCE()的调用放在不同的C语
+ * 句中。ACCESS_ONCE只适用于标量类型。对于联合类型，对联合成员的ACCESS_ONCE将起作用，只要
+ * 成员的大小与联合的大小相同且大小小于字大小即可。ACCESS_ONCE的主要用途曾经是(1)在同一CPU
+ * 上运行的进程级代码和irq/NMI处理程序之间进行通信，(2)确保编译器不会折叠、扭曲或以其他方式
+ * 残缺不全地访问那些不需要排序或与提供所需排序的显式内存屏障或原子指令交互的访问。
+ *
+ *如果可能，请使用READ_ONCE/ASSIGN_ONCE代替。
  */
 #define __ACCESS_ONCE(x) ({ \
 	 __maybe_unused typeof(x) __var = (__force typeof(x)) 0; \

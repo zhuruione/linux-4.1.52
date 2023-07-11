@@ -222,7 +222,7 @@ error:
 }
 
 /**
- * prepare_creds - Prepare a new set of credentials for modification
+ * prepare_creds - Prepare a new set of credentials for modification(修改)
  *
  * Prepare a new set of task credentials for modification.  A task's creds
  * shouldn't generally be modified directly, therefore this function is used to
@@ -306,7 +306,7 @@ struct cred *prepare_exec_creds(void)
 }
 
 /*
- * Copy credentials for the new process created by fork()
+ * Copy credentials(凭据) for the new process created by fork()
  *
  * We share if we can, but under some circumstances we have to generate a new
  * set.

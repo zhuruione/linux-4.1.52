@@ -12,7 +12,7 @@
 
 struct seccomp_filter;
 /**
- * struct seccomp - the state of a seccomp'ed process
+ * struct seccomp - the state of a seccomp'ed process（秒表进程的状态）
  *
  * @mode:  indicates one of the valid values above for controlled
  *         system calls available to a process.

@@ -144,6 +144,7 @@ static inline struct pid_namespace *ns_of_pid(struct pid *pid)
  * of the current namespace. As this one could be checked before
  * pid_ns->child_reaper is assigned in copy_process, we check
  * with the pid number.
+ * 如果 pid 是当前命名空间的初始化进程，则is_child_reaper返回 true。由于可以在copy_process中分配pid_ns->child_reaper之前检查这一点，因此我们使用pid编号进行检查。
  */
 static inline bool is_child_reaper(struct pid *pid)
 {

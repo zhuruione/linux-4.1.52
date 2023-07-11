@@ -212,6 +212,12 @@ struct kmem_cache *vm_area_cachep;
 /* SLAB cache for mm_struct structures (tsk->mm) */
 static struct kmem_cache *mm_cachep;
 
+/*
+ * account_kernel_stack是Linux内核中的一个函数，用于记录内核栈的使用情况。
+ * 这个函数可以帮助内核检测栈溢出错误，从而提高系统安全性。当内核栈溢出时，它可
+ * 能会覆盖其他内存区域，从而导致程序崩溃或安全漏洞。通过记录内核栈的使用情况，
+ * 内核可以检测到这种错误并采取适当的措施，例如终止进程或向用户发送警告消息。
+ * */
 static void account_kernel_stack(struct thread_info *ti, int account)
 {
 	struct zone *zone = page_zone(virt_to_page(ti));
@@ -329,14 +335,14 @@ static struct task_struct *dup_task_struct(struct task_struct *orig)
 {
 	struct task_struct *tsk;
 	struct thread_info *ti;
-	int node = tsk_fork_get_node(orig);
+	int node = tsk_fork_get_node(orig);  //获取当前cpu的numa对应内存节点？。
 	int err;
 
-	tsk = alloc_task_struct_node(node);
+	tsk = alloc_task_struct_node(node); //分配task_struct节点
 	if (!tsk)
 		return NULL;
 
-	ti = alloc_thread_info_node(tsk, node);
+	ti = alloc_thread_info_node(tsk, node); //分配thread_info节点
 	if (!ti)
 		goto free_tsk;
 
@@ -347,7 +353,10 @@ static struct task_struct *dup_task_struct(struct task_struct *orig)
 	tsk->stack = ti;
 #ifdef CONFIG_SECCOMP
 	/*
-	 * We must handle setting up seccomp filters once we're under
+	 * We must handle setting up seccomp（seccomp filters是Linux
+	 * 内核的一个安全机制，用于限制进程可以执行的系统调用。这个机制可以帮助防
+	 * 止恶意代码执行，从而提高系统安全性。seccomp filters可以在进程启动时
+	 * 设置，也可以在运行时动态修改。） filters once we're under
 	 * the sighand lock in case orig has changed between now and
 	 * then. Until then, filter must be NULL to avoid messing up
 	 * the usage counts on the error path calling free_task.
@@ -355,7 +364,7 @@ static struct task_struct *dup_task_struct(struct task_struct *orig)
 	tsk->seccomp.filter = NULL;
 #endif
 
-	setup_thread_stack(tsk, orig);
+	setup_thread_stack(tsk, orig);  //复制进程描述符内容
 	clear_user_return_notifier(tsk);
 	clear_tsk_need_resched(tsk);
 	set_task_stack_end_magic(tsk);
@@ -1244,7 +1253,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 					int trace)
 {
 	int retval;
-	struct task_struct *p;
+	struct task_struct *p;  //新进程
 
 	if ((clone_flags & (CLONE_NEWNS|CLONE_FS)) == (CLONE_NEWNS|CLONE_FS))
 		return ERR_PTR(-EINVAL);
@@ -1289,12 +1298,12 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 			return ERR_PTR(-EINVAL);
 	}
 
-	retval = security_task_create(clone_flags);
+	retval = security_task_create(clone_flags); //附加的安全检查
 	if (retval)
 		goto fork_out;
 
 	retval = -ENOMEM;
-	p = dup_task_struct(current);
+	p = dup_task_struct(current); //获取进程描述符
 	if (!p)
 		goto fork_out;
 
@@ -1307,7 +1316,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	DEBUG_LOCKS_WARN_ON(!p->softirqs_enabled);
 #endif
 	retval = -EAGAIN;
-	if (atomic_read(&p->real_cred->user->processes) >=
+	if (atomic_read(&p->real_cred->user->processes) >=  //读取当前用户所拥有的进程数量
 			task_rlimit(p, RLIMIT_NPROC)) {
 		if (p->real_cred->user != INIT_USER &&
 		    !capable(CAP_SYS_RESOURCE) && !capable(CAP_SYS_ADMIN))
@@ -1328,16 +1337,16 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	if (nr_threads >= max_threads)
 		goto bad_fork_cleanup_count;
 
-	delayacct_tsk_init(p);	/* Must remain after dup_task_struct() */
+	delayacct_tsk_init(p);	/* Must remain（保持） after dup_task_struct() */
 	p->flags &= ~(PF_SUPERPRIV | PF_WQ_WORKER);
 	p->flags |= PF_FORKNOEXEC;
-	INIT_LIST_HEAD(&p->children);
-	INIT_LIST_HEAD(&p->sibling);
+	INIT_LIST_HEAD(&p->children);  //孩子进程队列
+	INIT_LIST_HEAD(&p->sibling);   //兄弟进程队列
 	rcu_copy_process(p);
 	p->vfork_done = NULL;
-	spin_lock_init(&p->alloc_lock);
+	spin_lock_init(&p->alloc_lock);  //初始化自旋锁
 
-	init_sigpending(&p->pending);
+	init_sigpending(&p->pending);  //初始化信号挂起队列
 
 	p->utime = p->stime = p->gtime = 0;
 	p->utimescaled = p->stimescaled = 0;
@@ -1359,14 +1368,16 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	task_io_accounting_init(&p->ioac);
 	acct_clear_integrals(p);
 
+    //时间相关配置
 	posix_cpu_timers_init(p);
 
 	p->start_time = ktime_get_ns();
 	p->real_start_time = ktime_get_boot_ns();
 	p->io_context = NULL;
-	p->audit_context = NULL;
+	p->audit_context = NULL;  //审核上下文
 	if (clone_flags & CLONE_THREAD)
 		threadgroup_change_begin(current);
+    /*Cgroups是Linux内核提供的一种可以限制、记录、隔离进程组（process groups）所使用的物理资源（如：cpu,memory, IO 等等）的机制。*/
 	cgroup_fork(p);
 #ifdef CONFIG_NUMA
 	p->mempolicy = mpol_dup(p->mempolicy);
@@ -1411,7 +1422,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 #endif
 
 	/* Perform scheduler related setup. Assign this task to a CPU. */
-	retval = sched_fork(clone_flags, p);
+	retval = sched_fork(clone_flags, p);   //对新进程调度程序进行初始化，把新进程的运行状态改为TASK_RUNNING
 	if (retval)
 		goto bad_fork_cleanup_policy;
 
@@ -1447,7 +1458,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	retval = copy_io(clone_flags, p);
 	if (retval)
 		goto bad_fork_cleanup_namespaces;
-	retval = copy_thread(clone_flags, stack_start, stack_size, p);
+	retval = copy_thread(clone_flags, stack_start, stack_size, p);  //用发出clone（）系统调用时cpu寄存器的值（已经在当前进程的内核栈中）来初始化子进程p的内核栈,并设置新进程的返回值
 	if (retval)
 		goto bad_fork_cleanup_io;
 
@@ -1516,7 +1527,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	p->task_works = NULL;
 
 	/*
-	 * Make it visible to the rest of the system, but dont wake it up yet.
+	 * Make it visible(可见） to the rest of the system, but dont wake it up yet.
 	 * Need tasklist lock for parent etc handling!
 	 */
 	write_lock_irq(&tasklist_lock);
@@ -1535,6 +1546,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	/*
 	 * Copy seccomp details explicitly here, in case they were changed
 	 * before holding sighand lock.
+	 * Seccomp是Linux内核从2.6.12版本开始支持的一种安全机制，主要是用来限制某一进程可用的系统调用
 	 */
 	copy_seccomp(p);
 
@@ -1545,6 +1557,8 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	 * it's process group.
 	 * A fatal signal pending means that current will exit, so the new
 	 * thread can't slip out of an OOM kill (or normal SIGKILL).
+	 *
+	 * 进程组和会话信号需要在分叉之前只传递给父级，或者在分叉后同时传递给父级和子级。如果信号传入，请在我们将新流程添加到其进程组之前重新启动。致命信号挂起意味着电流将退出，因此新线程无法从 OOM kill（或正常 SIGKILL）中滑出。
 	*/
 	recalc_sigpending();
 	if (signal_pending(current)) {
@@ -1558,7 +1572,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 		ptrace_init_task(p, (clone_flags & CLONE_PTRACE) || trace);
 
 		init_task_pid(p, PIDTYPE_PID, pid);
-		if (thread_group_leader(p)) {
+		if (thread_group_leader(p)) {     //如果当前进程为进程组的首进程时，设置当前进程的会话id和组id设置为当前进程
 			init_task_pid(p, PIDTYPE_PGID, task_pgrp(current));
 			init_task_pid(p, PIDTYPE_SID, task_session(current));
 
@@ -1669,6 +1683,12 @@ struct task_struct *fork_idle(int cpu)
 }
 
 /*
+ * 学习总结：
+ * 通过copy_process来创建一个新进程p ，通过dup_task_struct函数获取一个新的进程描述符并对进程p进行一系列的初始化，
+ * 然后再通过sched_fork函数对p进程进行进程调度的初始化，之后使用copy_thread函数用发出clone（）系统调用时cpu寄存
+ * 器的值（已经在当前进程的内核栈中）来初始化子进程p的内核栈,并设置新进程的返回值。此时子进程的返回值为0,并准备调度中。
+ * */
+/*
  *  Ok, this is the main fork-routine.
  *
  * It copies the process, and if successful kick-starts
@@ -1726,7 +1746,7 @@ long do_fork(unsigned long clone_flags,
 			get_task_struct(p);
 		}
 
-		wake_up_new_task(p);
+		wake_up_new_task(p); //唤醒子进程p
 
 		/* forking complete and child started to run, tell ptracer */
 		if (unlikely(trace))
